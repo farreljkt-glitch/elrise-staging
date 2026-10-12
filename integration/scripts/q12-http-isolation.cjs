@@ -90,6 +90,34 @@ async function main() {
   assert.ok(await db.pegawai.findFirst({ where: { id:ownCreate.body.employee.id,clientId:clientA.id } }));
   console.log("PASS authorized Admin PT employee creation persists");
 
+  // Invitation, activation and session account provisioning are exercised over HTTP.
+  const foreignInvite = await request("/api/admin/employee-invitations", {
+    method: "POST", headers: { cookie: cookieA, "content-type": "application/json" },
+    body: JSON.stringify({ pegawaiId: employeeB.id }),
+  });
+  assert.equal(foreignInvite.response.status, 400, "foreign tenant invitation must be denied");
+  const invite = await request("/api/admin/employee-invitations", {
+    method: "POST", headers: { cookie: cookieA, "content-type": "application/json" },
+    body: JSON.stringify({ pegawaiId: ownCreate.body.employee.id }),
+  });
+  assert.equal(invite.response.status, 200, JSON.stringify(invite.body));
+  assert.ok(invite.body.token && invite.body.token.length >= 40);
+  const activatedPassword = "new-employee-secret-" + suffix;
+  const activate = await request("/api/auth/employee-invitation", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ token: invite.body.token, password: activatedPassword }),
+  });
+  assert.equal(activate.response.status, 200, JSON.stringify(activate.body));
+  const replay = await request("/api/auth/employee-invitation", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ token: invite.body.token, password: activatedPassword }),
+  });
+  assert.equal(replay.response.status, 400, "used invitation must not activate again");
+  const cookieEmployee = await login("new-"+suffix+"@example.com", activatedPassword);
+  const employeeAdminDenied = await request("/api/admin/employees", withCookie(cookieEmployee));
+  assert.equal(employeeAdminDenied.response.status, 403);
+  console.log("PASS tenant-scoped invitation, single-use activation and employee RBAC");
+
   const projectDenied = await request("/api/admin/employees", withCookie(cookieProject));
   assert.equal(projectDenied.response.status, 403);
   const projectTeam = await request("/api/project/team", withCookie(cookieProject));
