@@ -72,3 +72,5 @@ jobs:
         run: npx prisma db push
       - name: Assert critical tables and unique constraints
         run: node integration/scripts/q6-schema-smoke.cjs
+      - name: Exercise disposable MySQL transactions and unique keys
+        run: node integration/scripts/q11-mysql-transactions.cjs
