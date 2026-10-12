@@ -1,0 +1,6 @@
+{
+  "name": "Terhubung Gajiku — HRIS Elkyno",
+  "description": "Sistem HRIS multi-klien terhubung dengan Gajiku untuk Superadmin, Admin Klien, dan Pegawai.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

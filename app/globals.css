@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Token warna elrise — navy #123054 + teal #31A28E (dari logo resmi)
+   Light = default. Dark dipasang lewat <html data-theme="dark"> (lihat lib/theme.tsx).
+   ========================================================================== */
+:root {
+  color-scheme: light;
+  --bg: #f4f7fa;
+  --surface: #ffffff;
+  --surface-2: #f0f4f8;
+  --surface-3: #e6ecf3;
+  --border: #dce4ec;
+  --text-primary: #0f2540;
+  --text-secondary: #475b73;
+  --text-muted: #5f7389;
+
+  /* aksen: versi "teks" dipilih agar kontras >= 4.5:1 di atas putih */
+  --blue: #1d4e89;
+  --teal: #17806e;
+  --success: #12795f;
+  --warning: #8a5a00;
+  --danger: #b42318;
+  --info: #1d4e89;
+
+  /* warna merek asli (dekoratif, bukan untuk teks kecil) */
+  --brand-navy: #123054;
+  --brand-teal: #31a28e;
+
+  /* permukaan beraksen: teks putih di atasnya >= 4.8:1 */
+  --on-accent: #ffffff;
+  --grad: linear-gradient(135deg, #123054 0%, #1b6f86 55%, #1b7f70 100%);
+  --grad-soft: linear-gradient(135deg, rgba(18, 48, 84, 0.08), rgba(49, 162, 142, 0.14));
+
+  --shadow-card: 0 1px 2px rgba(15, 37, 64, 0.05), 0 4px 16px rgba(15, 37, 64, 0.06);
+  --shadow-pop: 0 12px 40px rgba(15, 37, 64, 0.18);
+  --nav-bg: rgba(255, 255, 255, 0.86);
+  --overlay: rgba(15, 37, 64, 0.45);
+  --ring: rgba(49, 162, 142, 0.45);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 140ms;
+  --dur: 220ms;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #07101c;
+  --surface: #0e1a2b;
+  --surface-2: #132238;
+  --surface-3: #1a2d47;
+  --border: #213650;
+  --text-primary: #eaf1f9;
+  --text-secondary: #a3b5c9;
+  --text-muted: #7f92a8;
+
+  --blue: #7fb0e6;
+  --teal: #3ec4ac;
+  --success: #34d3a0;
+  --warning: #f2bc57;
+  --danger: #ff8a8a;
+  --info: #7fb0e6;
+
+  --grad: linear-gradient(135deg, #123054 0%, #17607a 55%, #1b7f70 100%);
+  --grad-soft: linear-gradient(135deg, rgba(127, 176, 230, 0.10), rgba(62, 196, 172, 0.14));
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 20px rgba(0, 0, 0, 0.28);
+  --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --nav-bg: rgba(14, 26, 43, 0.88);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --ring: rgba(62, 196, 172, 0.5);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* transisi warna hanya saat tema diganti (class dipasang sebentar oleh ThemeProvider) */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease, fill 220ms ease !important;
+}
+
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* ==========================================================================
+   Animasi — hanya transform/opacity, <= 220ms, tidak memblokir interaksi
+   ========================================================================== */
+@keyframes m-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes m-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes m-pop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
+@keyframes m-sheet { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes m-shimmer { 100% { transform: translateX(100%); } }
+@keyframes m-ping { 0% { transform: scale(0.6); opacity: 0.55; } 100% { transform: scale(2.2); opacity: 0; } }
+@keyframes m-spin { to { transform: rotate(360deg); } }
+
+/* masuk halaman (dipakai template.tsx) */
+.page-enter { animation: m-fade-up var(--dur) var(--ease-out) both; }
+
+/* kemunculan elemen dengan stagger: style={{ "--i": 2 }} */
+.anim-in { animation: m-fade-up var(--dur) var(--ease-out) both; animation-delay: calc(min(var(--i, 0), 8) * 35ms); }
+.anim-pop { animation: m-pop var(--dur) var(--ease-out) both; animation-delay: calc(min(var(--i, 0), 8) * 30ms); }
+.anim-sheet { animation: m-sheet var(--dur) var(--ease-out) both; }
+.anim-fade { animation: m-fade var(--dur) ease both; }
+
+/* umpan balik tekan — instan terasa */
+.press { transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease; will-change: transform; }
+.press:active { transform: scale(0.96); }
+.press-sm:active { transform: scale(0.98); }
+@media (hover: hover) {
+  .lift { transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out); }
+  .lift:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+}
+
+/* skeleton */
+.skeleton { position: relative; overflow: hidden; background: var(--surface-3); border-radius: 10px; }
+.skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--surface) 70%, transparent), transparent);
+  animation: m-shimmer 1.2s infinite; }
+
+/* titik lokasi berdenyut */
+.pin-ping { position: absolute; inset: 0; border-radius: 9999px; background: var(--brand-teal); animation: m-ping 1.8s var(--ease-out) infinite; }
+
+/* indikator bottom-nav yang bergeser */
+.nav-indicator { position: absolute; top: 0; left: 0; height: 3px; width: 25%; display: flex; justify-content: center;
+  transition: transform 280ms var(--ease-out); }
+.nav-indicator > span { width: 28px; height: 3px; border-radius: 0 0 4px 4px; background: var(--grad); }
+
+/* ==========================================================================
+   Komponen mobile
+   ========================================================================== */
+.m-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-card); }
+.m-glass { background: var(--nav-bg); -webkit-backdrop-filter: saturate(160%) blur(14px); backdrop-filter: saturate(160%) blur(14px); }
+
+.m-hero { position: relative; overflow: hidden; border-radius: 24px; color: var(--on-accent); background: var(--grad); box-shadow: var(--shadow-card); }
+.m-hero::before, .m-hero::after { content: ""; position: absolute; border-radius: 9999px; pointer-events: none; }
+.m-hero::before { width: 220px; height: 220px; right: -70px; top: -90px; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); }
+.m-hero::after { width: 180px; height: 180px; left: -60px; bottom: -90px; background: radial-gradient(circle, rgba(49,162,142,.35), transparent 70%); }
+
+.m-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; line-height: 1.2; }
+
+.m-menu-icon { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: var(--grad-soft); border: 1px solid var(--border); color: var(--blue); transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) ease; }
+a:active > .m-menu-icon { transform: scale(0.92); }
+
+.m-map { position: relative; border-radius: 9999px; overflow: hidden; background:
+  radial-gradient(circle at 30% 30%, rgba(255,255,255,.28), transparent 45%),
+  repeating-linear-gradient(35deg, rgba(255,255,255,.14) 0 2px, transparent 2px 22px),
+  repeating-linear-gradient(-55deg, rgba(255,255,255,.10) 0 2px, transparent 2px 26px),
+  rgba(255,255,255,.10);
+  border: 3px solid rgba(255,255,255,.28); }
+
+.safe-area-pb { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+/* ==========================================================================
+   Aksesibilitas gerak
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
+  .pin-ping, .skeleton::after { animation: none !important; }
+}
+
+/* logo: tampilkan varian sesuai tema */
+:root[data-theme="dark"] .logo-light { display: none; }
+:root:not([data-theme="dark"]) .logo-dark { display: none; }
+
+/* cetak (slip gaji): selalu pakai token terang agar teks terbaca di kertas walau layar sedang mode gelap */
+@media print {
+  :root[data-theme="dark"] {
+    color-scheme: light;
+    --bg: #fff; --surface: #fff; --surface-2: #f0f4f8; --surface-3: #e6ecf3; --border: #dce4ec;
+    --text-primary: #0f2540; --text-secondary: #475b73; --text-muted: #5f7389;
+    --blue: #1d4e89; --teal: #17806e; --success: #12795f; --warning: #8a5a00; --danger: #b42318;
+  }
+  .logo-dark { display: none !important; }
+  .logo-light { display: inline-block !important; }
+}

@@ -1,0 +1,113 @@
+import { Client, MouConfig } from "../types";
+
+export const MOCK_CLIENTS: Client[] = [
+  {
+    id: "client-1",
+    code: "SMS",
+    name: "PT Sumber Makmur Sejahtera",
+    address: "Kawasan Industri MM2100 Blok C-4, Cikarang Barat, Bekasi",
+    contactEmail: "hrd@sumbermakmur.co.id",
+    contactPhone: "021-8980123",
+    picName: "Bambang Sudirjo",
+    status: "AKTIF",
+    projectCount: 2,
+    employeeCount: 5,
+    kasbonIntegration: true,
+    createdAt: "2025-01-10",
+    brandColor: "#2f8cf0",
+  },
+  {
+    id: "client-2",
+    code: "DNJ",
+    name: "PT Digital Niaga Jaya",
+    address: "Jl. Sudirman Kav. 52-53, SCBD Gedung Menara Mandiri Lt. 18, Jakarta Selatan",
+    contactEmail: "people@digitalniaga.id",
+    contactPhone: "021-5299400",
+    picName: "Citra Kirana",
+    status: "AKTIF",
+    projectCount: 1,
+    employeeCount: 3,
+    kasbonIntegration: false,
+    createdAt: "2025-03-01",
+    brandColor: "#2ed3c0",
+  },
+];
+
+export const MOCK_MOU_CONFIG: Record<string, MouConfig> = {
+  "client-1": {
+    clientId: "client-1",
+    modules: {
+      attendance: true,
+      leave: true,
+      payroll: true,
+      gajikuKasbon: true,
+    },
+    workRules: {
+      startTime: "08:30",
+      endTime: "17:30",
+      gracePeriodMinutes: 15,
+      workDaysPerWeek: 5,
+      offDays: ["Sabtu", "Minggu"],
+    },
+    attendanceValidation: {
+      requireSelfie: true,
+      requireGps: true,
+      requireOfficeIp: false,
+      validationCombo: "GPS_OR_IP",
+      gpsRadiusMeters: 100,
+      maxGpsAccuracyMeters: 50,
+    },
+    leaveRules: {
+      annualQuota: 12,
+      allowBeforeProbation: false,
+      allowNegativeBalance: false,
+      singleLevelApproval: true,
+    },
+    payrollRules: {
+      activeCycles: ["SIKLUS_A", "SIKLUS_B"],
+      fixedAllowance: true,
+      mealAllowance: true,
+      transportAllowance: true,
+      overtimeMultiplier: 1.5,
+      alphaDeductionPerDay: 150000,
+    },
+  },
+  "client-2": {
+    clientId: "client-2",
+    modules: {
+      attendance: true,
+      leave: true,
+      payroll: true,
+      gajikuKasbon: false,
+    },
+    workRules: {
+      startTime: "09:00",
+      endTime: "18:00",
+      gracePeriodMinutes: 10,
+      workDaysPerWeek: 5,
+      offDays: ["Sabtu", "Minggu"],
+    },
+    attendanceValidation: {
+      requireSelfie: false,
+      requireGps: true,
+      requireOfficeIp: true,
+      validationCombo: "GPS_AND_IP",
+      gpsRadiusMeters: 50,
+      maxGpsAccuracyMeters: 30,
+    },
+    leaveRules: {
+      annualQuota: 14,
+      allowBeforeProbation: true,
+      allowNegativeBalance: false,
+      singleLevelApproval: false,
+    },
+    payrollRules: {
+      activeCycles: ["SIKLUS_A"],
+      fixedAllowance: true,
+      mealAllowance: false,
+      transportAllowance: true,
+      overtimeMultiplier: 2.0,
+      alphaDeductionPerDay: 200000,
+    },
+  },
+};

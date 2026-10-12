@@ -1,0 +1,924 @@
+﻿Prisma schema loaded from prisma\schema.prisma
+node.exe : 
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Error: Prisma schema validation - (validate wasm)
+Error code: P1012
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:2[0m
+[1;94m   | [0m
+[1;94m 1 | [0mgenerator client { provider = "prisma-client-js" }
+[1;94m 2 | [0m[1;91mdatasource db { provider = "mysql" url = env("DATABASE_URL") }[0m
+[1;94m 3 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:4[0m
+[1;94m   | [0m
+[1;94m 3 | [0m
+[1;94m 4 | [0m[1;91menum Role { SUPERADMIN ADMIN PEGAWAI }[0m
+[1;94m 5 | [0menum ClientStatus { AKTIF SUSPEND NONAKTIF }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:5[0m
+[1;94m   | [0m
+[1;94m 4 | [0menum Role { SUPERADMIN ADMIN PEGAWAI }
+[1;94m 5 | [0m[1;91menum ClientStatus { AKTIF SUSPEND NONAKTIF }[0m
+[1;94m 6 | [0menum AttendanceStatus { HADIR TELAT ALPHA CUTI IZIN DINAS LIBUR }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:6[0m
+[1;94m   | [0m
+[1;94m 5 | [0menum ClientStatus { AKTIF SUSPEND NONAKTIF }
+[1;94m 6 | [0m[1;91menum AttendanceStatus { HADIR TELAT ALPHA CUTI IZIN DINAS LIBUR }[0m
+[1;94m 7 | [0menum AttendanceSource { WEB MOBILE ADMIN_CORRECTION }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:7[0m
+[1;94m   | [0m
+[1;94m 6 | [0menum AttendanceStatus { HADIR TELAT ALPHA CUTI IZIN DINAS LIBUR }
+[1;94m 7 | [0m[1;91menum AttendanceSource { WEB MOBILE ADMIN_CORRECTION }[0m
+[1;94m 8 | [0menum RequestStatus { MENUNGGU DISETUJUI DITOLAK DIBATALKAN }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:8[0m
+[1;94m   | [0m
+[1;94m 7 | [0menum AttendanceSource { WEB MOBILE ADMIN_CORRECTION }
+[1;94m 8 | [0m[1;91menum RequestStatus { MENUNGGU DISETUJUI DITOLAK DIBATALKAN }[0m
+[1;94m 9 | [0menum PayrollStatus { DRAFT REVIEW LOCKED PAID }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:9[0m
+[1;94m   | [0m
+[1;94m 8 | [0menum RequestStatus { MENUNGGU DISETUJUI DITOLAK DIBATALKAN }
+[1;94m 9 | [0m[1;91menum PayrollStatus { DRAFT REVIEW LOCKED PAID }[0m
+[1;94m10 | [0menum PayrollCycle { A B C D }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:10[0m
+[1;94m   | [0m
+[1;94m 9 | [0menum PayrollStatus { DRAFT REVIEW LOCKED PAID }
+[1;94m10 | [0m[1;91menum PayrollCycle { A B C D }[0m
+[1;94m11 | [0menum AttendanceNetworkRule { GPS IP GPS_DAN_IP GPS_ATAU_IP }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:11[0m
+[1;94m   | [0m
+[1;94m10 | [0menum PayrollCycle { A B C D }
+[1;94m11 | [0m[1;91menum AttendanceNetworkRule { GPS IP GPS_DAN_IP GPS_ATAU_IP }[0m
+[1;94m12 | [0menum LeaveUnit { HARI JAM }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:12[0m
+[1;94m   | [0m
+[1;94m11 | [0menum AttendanceNetworkRule { GPS IP GPS_DAN_IP GPS_ATAU_IP }
+[1;94m12 | [0m[1;91menum LeaveUnit { HARI JAM }[0m
+[1;94m13 | [0menum AuditAction { CREATE UPDATE DELETE LOGIN LOGOUT APPROVE REJECT LOCK PAY }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:13[0m
+[1;94m   | [0m
+[1;94m12 | [0menum LeaveUnit { HARI JAM }
+[1;94m13 | [0m[1;91menum AuditAction { CREATE UPDATE DELETE LOGIN LOGOUT APPROVE REJECT LOCK PAY }[0m
+[1;94m14 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:15[0m
+[1;94m   | [0m
+[1;94m14 | [0m
+[1;94m15 | [0m[1;91mmodel Client {[0m
+[1;94m16 | [0m id String @id @default(cuid())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:16[0m
+[1;94m   | [0m
+[1;94m15 | [0mmodel Client {
+[1;94m16 | [0m [1;91mid String @id @default(cuid())[0m
+[1;94m17 | [0m code String @unique @db.VarChar(40)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:17[0m
+[1;94m   | [0m
+[1;94m16 | [0m id String @id @default(cuid())
+[1;94m17 | [0m [1;91mcode String @unique @db.VarChar(40)[0m
+[1;94m18 | [0m name String @db.VarChar(180)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:18[0m
+[1;94m   | [0m
+[1;94m17 | [0m code String @unique @db.VarChar(40)
+[1;94m18 | [0m [1;91mname String @db.VarChar(180)[0m
+[1;94m19 | [0m address String? @db.Text
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:19[0m
+[1;94m   | [0m
+[1;94m18 | [0m name String @db.VarChar(180)
+[1;94m19 | [0m [1;91maddress String? @db.Text[0m
+[1;94m20 | [0m contactEmail String? @db.VarChar(191)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:20[0m
+[1;94m   | [0m
+[1;94m19 | [0m address String? @db.Text
+[1;94m20 | [0m [1;91mcontactEmail String? @db.VarChar(191)[0m
+[1;94m21 | [0m contactPhone String? @db.VarChar(40)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:21[0m
+[1;94m   | [0m
+[1;94m20 | [0m contactEmail String? @db.VarChar(191)
+[1;94m21 | [0m [1;91mcontactPhone String? @db.VarChar(40)[0m
+[1;94m22 | [0m picName String? @db.VarChar(120)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:22[0m
+[1;94m   | [0m
+[1;94m21 | [0m contactPhone String? @db.VarChar(40)
+[1;94m22 | [0m [1;91mpicName String? @db.VarChar(120)[0m
+[1;94m23 | [0m status ClientStatus @default(AKTIF)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:23[0m
+[1;94m   | [0m
+[1;94m22 | [0m picName String? @db.VarChar(120)
+[1;94m23 | [0m [1;91mstatus ClientStatus @default(AKTIF)[0m
+[1;94m24 | [0m brandColor String? @db.VarChar(20)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:24[0m
+[1;94m   | [0m
+[1;94m23 | [0m status ClientStatus @default(AKTIF)
+[1;94m24 | [0m [1;91mbrandColor String? @db.VarChar(20)[0m
+[1;94m25 | [0m createdAt DateTime @default(now())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:25[0m
+[1;94m   | [0m
+[1;94m24 | [0m brandColor String? @db.VarChar(20)
+[1;94m25 | [0m [1;91mcreatedAt DateTime @default(now())[0m
+[1;94m26 | [0m updatedAt DateTime @updatedAt
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:26[0m
+[1;94m   | [0m
+[1;94m25 | [0m createdAt DateTime @default(now())
+[1;94m26 | [0m [1;91mupdatedAt DateTime @updatedAt[0m
+[1;94m27 | [0m projects Project[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:27[0m
+[1;94m   | [0m
+[1;94m26 | [0m updatedAt DateTime @updatedAt
+[1;94m27 | [0m [1;91mprojects Project[][0m
+[1;94m28 | [0m setting ClientSetting?
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:28[0m
+[1;94m   | [0m
+[1;94m27 | [0m projects Project[]
+[1;94m28 | [0m [1;91msetting ClientSetting?[0m
+[1;94m29 | [0m users User[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:29[0m
+[1;94m   | [0m
+[1;94m28 | [0m setting ClientSetting?
+[1;94m29 | [0m [1;91musers User[][0m
+[1;94m30 | [0m employees Pegawai[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:30[0m
+[1;94m   | [0m
+[1;94m29 | [0m users User[]
+[1;94m30 | [0m [1;91memployees Pegawai[][0m
+[1;94m31 | [0m officeLocations OfficeLocation[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:31[0m
+[1;94m   | [0m
+[1;94m30 | [0m employees Pegawai[]
+[1;94m31 | [0m [1;91mofficeLocations OfficeLocation[][0m
+[1;94m32 | [0m officeIps OfficeIp[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:32[0m
+[1;94m   | [0m
+[1;94m31 | [0m officeLocations OfficeLocation[]
+[1;94m32 | [0m [1;91mofficeIps OfficeIp[][0m
+[1;94m33 | [0m attendances Attendance[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:33[0m
+[1;94m   | [0m
+[1;94m32 | [0m officeIps OfficeIp[]
+[1;94m33 | [0m [1;91mattendances Attendance[][0m
+[1;94m34 | [0m leaveTypes LeaveType[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:34[0m
+[1;94m   | [0m
+[1;94m33 | [0m attendances Attendance[]
+[1;94m34 | [0m [1;91mleaveTypes LeaveType[][0m
+[1;94m35 | [0m leaveRequests LeaveRequest[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:35[0m
+[1;94m   | [0m
+[1;94m34 | [0m leaveTypes LeaveType[]
+[1;94m35 | [0m [1;91mleaveRequests LeaveRequest[][0m
+[1;94m36 | [0m leaveBalances LeaveBalance[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:36[0m
+[1;94m   | [0m
+[1;94m35 | [0m leaveRequests LeaveRequest[]
+[1;94m36 | [0m [1;91mleaveBalances LeaveBalance[][0m
+[1;94m37 | [0m holidays Holiday[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:37[0m
+[1;94m   | [0m
+[1;94m36 | [0m leaveBalances LeaveBalance[]
+[1;94m37 | [0m [1;91mholidays Holiday[][0m
+[1;94m38 | [0m payrollPeriods PayrollPeriod[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:38[0m
+[1;94m   | [0m
+[1;94m37 | [0m holidays Holiday[]
+[1;94m38 | [0m [1;91mpayrollPeriods PayrollPeriod[][0m
+[1;94m39 | [0m auditLogs AuditLog[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:39[0m
+[1;94m   | [0m
+[1;94m38 | [0m payrollPeriods PayrollPeriod[]
+[1;94m39 | [0m [1;91mauditLogs AuditLog[][0m
+[1;94m40 | [0m integrationConnection IntegrationConnection?
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:40[0m
+[1;94m   | [0m
+[1;94m39 | [0m auditLogs AuditLog[]
+[1;94m40 | [0m [1;91mintegrationConnection IntegrationConnection?[0m
+[1;94m41 | [0m bundleSubscription BundleSubscription?
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:41[0m
+[1;94m   | [0m
+[1;94m40 | [0m integrationConnection IntegrationConnection?
+[1;94m41 | [0m [1;91mbundleSubscription BundleSubscription?[0m
+[1;94m42 | [0m loanPolicies BundleLoanPolicy[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:42[0m
+[1;94m   | [0m
+[1;94m41 | [0m bundleSubscription BundleSubscription?
+[1;94m42 | [0m [1;91mloanPolicies BundleLoanPolicy[][0m
+[1;94m43 | [0m @@index([status])
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not a valid definition within a generator.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:43[0m
+[1;94m   | [0m
+[1;94m42 | [0m loanPolicies BundleLoanPolicy[]
+[1;94m43 | [0m [1;91m@@index([status])[0m
+[1;94m44 | [0m}
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:357[0m
+[1;94m   | [0m
+[1;94m356 | [0menum IntegrationState { DISABLED PENDING ACTIVE SUSPENDED }
+[1;94m357 | [0m[1;91mmodel IntegrationConnection {[0m
+[1;94m358 | [0m id String @id @default(cuid())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:358[0m
+[1;94m   | [0m
+[1;94m357 | [0mmodel IntegrationConnection {
+[1;94m358 | [0m [1;91mid String @id @default(cuid())[0m
+[1;94m359 | [0m clientId String @unique
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:359[0m
+[1;94m   | [0m
+[1;94m358 | [0m id String @id @default(cuid())
+[1;94m359 | [0m [1;91mclientId String @unique[0m
+[1;94m360 | [0m externalTenantId String @db.VarChar(191)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:360[0m
+[1;94m   | [0m
+[1;94m359 | [0m clientId String @unique
+[1;94m360 | [0m [1;91mexternalTenantId String @db.VarChar(191)[0m
+[1;94m361 | [0m state IntegrationState @default(DISABLED)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:361[0m
+[1;94m   | [0m
+[1;94m360 | [0m externalTenantId String @db.VarChar(191)
+[1;94m361 | [0m [1;91mstate IntegrationState @default(DISABLED)[0m
+[1;94m362 | [0m payrollOwner String @default("ELRISE") @db.VarChar(20)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:362[0m
+[1;94m   | [0m
+[1;94m361 | [0m state IntegrationState @default(DISABLED)
+[1;94m362 | [0m [1;91mpayrollOwner String @default("ELRISE") @db.VarChar(20)[0m
+[1;94m363 | [0m verifiedAt DateTime?
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:363[0m
+[1;94m   | [0m
+[1;94m362 | [0m payrollOwner String @default("ELRISE") @db.VarChar(20)
+[1;94m363 | [0m [1;91mverifiedAt DateTime?[0m
+[1;94m364 | [0m createdAt DateTime @default(now())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:364[0m
+[1;94m   | [0m
+[1;94m363 | [0m verifiedAt DateTime?
+[1;94m364 | [0m [1;91mcreatedAt DateTime @default(now())[0m
+[1;94m365 | [0m updatedAt DateTime @updatedAt
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:365[0m
+[1;94m   | [0m
+[1;94m364 | [0m createdAt DateTime @default(now())
+[1;94m365 | [0m [1;91mupdatedAt DateTime @updatedAt[0m
+[1;94m366 | [0m client Client @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:366[0m
+[1;94m   | [0m
+[1;94m365 | [0m updatedAt DateTime @updatedAt
+[1;94m366 | [0m [1;91mclient Client @relation(fields:[clientId],references:[id],onDelete:Restrict)[0m
+[1;94m367 | [0m employees IntegrationEmployeeMap[]
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:367[0m
+[1;94m   | [0m
+[1;94m366 | [0m client Client @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m367 | [0m [1;91memployees IntegrationEmployeeMap[][0m
+[1;94m368 | [0m @@unique([externalTenantId])
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:385[0m
+[1;94m   | [0m
+[1;94m384 | [0menum IntegrationDeliveryStatus { PENDING IN_FLIGHT ACKNOWLEDGED RETRY DEAD_LETTER }
+[1;94m385 | [0m[1;91mmodel IntegrationSettlementOutbox {[0m
+[1;94m386 | [0m id String @id @default(cuid())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:386[0m
+[1;94m   | [0m
+[1;94m385 | [0mmodel IntegrationSettlementOutbox {
+[1;94m386 | [0m [1;91mid String @id @default(cuid())[0m
+[1;94m387 | [0m clientId String @db.VarChar(191)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:387[0m
+[1;94m   | [0m
+[1;94m386 | [0m id String @id @default(cuid())
+[1;94m387 | [0m [1;91mclientId String @db.VarChar(191)[0m
+[1;94m388 | [0m eventId String @unique @db.VarChar(191)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:388[0m
+[1;94m   | [0m
+[1;94m387 | [0m clientId String @db.VarChar(191)
+[1;94m388 | [0m [1;91meventId String @unique @db.VarChar(191)[0m
+[1;94m389 | [0m gajikuTxId String @db.VarChar(191)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:389[0m
+[1;94m   | [0m
+[1;94m388 | [0m eventId String @unique @db.VarChar(191)
+[1;94m389 | [0m [1;91mgajikuTxId String @db.VarChar(191)[0m
+[1;94m390 | [0m payrollItemId String @db.VarChar(191)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:390[0m
+[1;94m   | [0m
+[1;94m389 | [0m gajikuTxId String @db.VarChar(191)
+[1;94m390 | [0m [1;91mpayrollItemId String @db.VarChar(191)[0m
+[1;94m391 | [0m externalTenantId String @db.VarChar(191)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:391[0m
+[1;94m   | [0m
+[1;94m390 | [0m payrollItemId String @db.VarChar(191)
+[1;94m391 | [0m [1;91mexternalTenantId String @db.VarChar(191)[0m
+[1;94m392 | [0m externalEmployeeId String @db.VarChar(191)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:392[0m
+[1;94m   | [0m
+[1;94m391 | [0m externalTenantId String @db.VarChar(191)
+[1;94m392 | [0m [1;91mexternalEmployeeId String @db.VarChar(191)[0m
+[1;94m393 | [0m amount BigInt
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:393[0m
+[1;94m   | [0m
+[1;94m392 | [0m externalEmployeeId String @db.VarChar(191)
+[1;94m393 | [0m [1;91mamount BigInt[0m
+[1;94m394 | [0m payload Json
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:394[0m
+[1;94m   | [0m
+[1;94m393 | [0m amount BigInt
+[1;94m394 | [0m [1;91mpayload Json[0m
+[1;94m395 | [0m payloadHash String @db.Char(64)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:395[0m
+[1;94m   | [0m
+[1;94m394 | [0m payload Json
+[1;94m395 | [0m [1;91mpayloadHash String @db.Char(64)[0m
+[1;94m396 | [0m status IntegrationDeliveryStatus @default(PENDING)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:396[0m
+[1;94m   | [0m
+[1;94m395 | [0m payloadHash String @db.Char(64)
+[1;94m396 | [0m [1;91mstatus IntegrationDeliveryStatus @default(PENDING)[0m
+[1;94m397 | [0m attempts Int @default(0)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:397[0m
+[1;94m   | [0m
+[1;94m396 | [0m status IntegrationDeliveryStatus @default(PENDING)
+[1;94m397 | [0m [1;91mattempts Int @default(0)[0m
+[1;94m398 | [0m nextAttemptAt DateTime @default(now())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:398[0m
+[1;94m   | [0m
+[1;94m397 | [0m attempts Int @default(0)
+[1;94m398 | [0m [1;91mnextAttemptAt DateTime @default(now())[0m
+[1;94m399 | [0m lastError String? @db.VarChar(500)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:399[0m
+[1;94m   | [0m
+[1;94m398 | [0m nextAttemptAt DateTime @default(now())
+[1;94m399 | [0m [1;91mlastError String? @db.VarChar(500)[0m
+[1;94m400 | [0m acknowledgedAt DateTime?
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:400[0m
+[1;94m   | [0m
+[1;94m399 | [0m lastError String? @db.VarChar(500)
+[1;94m400 | [0m [1;91macknowledgedAt DateTime?[0m
+[1;94m401 | [0m createdAt DateTime @default(now())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:401[0m
+[1;94m   | [0m
+[1;94m400 | [0m acknowledgedAt DateTime?
+[1;94m401 | [0m [1;91mcreatedAt DateTime @default(now())[0m
+[1;94m402 | [0m updatedAt DateTime @updatedAt
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:402[0m
+[1;94m   | [0m
+[1;94m401 | [0m createdAt DateTime @default(now())
+[1;94m402 | [0m [1;91mupdatedAt DateTime @updatedAt[0m
+[1;94m403 | [0m @@unique([clientId,gajikuTxId])
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:411[0m
+[1;94m   | [0m
+[1;94m410 | [0menum BundleProductMode { ELRISE_ONLY BUNDLE }
+[1;94m411 | [0m[1;91menum LoanCeilingMode { PERCENT_OF_PRE_KASBON_THP FIXED_IDR }[0m
+[1;94m412 | [0mmodel BundleSubscription {
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:412[0m
+[1;94m   | [0m
+[1;94m411 | [0menum LoanCeilingMode { PERCENT_OF_PRE_KASBON_THP FIXED_IDR }
+[1;94m412 | [0m[1;91mmodel BundleSubscription {[0m
+[1;94m413 | [0m id String @id @default(cuid())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:413[0m
+[1;94m   | [0m
+[1;94m412 | [0mmodel BundleSubscription {
+[1;94m413 | [0m [1;91mid String @id @default(cuid())[0m
+[1;94m414 | [0m clientId String @unique
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:414[0m
+[1;94m   | [0m
+[1;94m413 | [0m id String @id @default(cuid())
+[1;94m414 | [0m [1;91mclientId String @unique[0m
+[1;94m415 | [0m mode BundleProductMode @default(ELRISE_ONLY)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:415[0m
+[1;94m   | [0m
+[1;94m414 | [0m clientId String @unique
+[1;94m415 | [0m [1;91mmode BundleProductMode @default(ELRISE_ONLY)[0m
+[1;94m416 | [0m effectiveAt DateTime
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:416[0m
+[1;94m   | [0m
+[1;94m415 | [0m mode BundleProductMode @default(ELRISE_ONLY)
+[1;94m416 | [0m [1;91meffectiveAt DateTime[0m
+[1;94m417 | [0m provisionedByUserId String
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:417[0m
+[1;94m   | [0m
+[1;94m416 | [0m effectiveAt DateTime
+[1;94m417 | [0m [1;91mprovisionedByUserId String[0m
+[1;94m418 | [0m activatedAt DateTime?
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:418[0m
+[1;94m   | [0m
+[1;94m417 | [0m provisionedByUserId String
+[1;94m418 | [0m [1;91mactivatedAt DateTime?[0m
+[1;94m419 | [0m createdAt DateTime @default(now())
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:419[0m
+[1;94m   | [0m
+[1;94m418 | [0m activatedAt DateTime?
+[1;94m419 | [0m [1;91mcreatedAt DateTime @default(now())[0m
+[1;94m420 | [0m updatedAt DateTime @updatedAt
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:420[0m
+[1;94m   | [0m
+[1;94m419 | [0m createdAt DateTime @default(now())
+[1;94m420 | [0m [1;91mupdatedAt DateTime @updatedAt[0m
+[1;94m421 | [0m client Client @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is not an enum value definition.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:421[0m
+[1;94m   | [0m
+[1;94m420 | [0m updatedAt DateTime @updatedAt
+[1;94m421 | [0m [1;91mclient Client @relation(fields:[clientId],references:[id],onDelete:Restrict)[0m
+[1;94m422 | [0m @@index([mode,effectiveAt])
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:54[0m
+[1;94m   | [0m
+[1;94m53 | [0m updatedAt DateTime @updatedAt
+[1;94m54 | [0m client [1;91mClient[0m @relation(fields:[clientId], references:[id], onDelete:Restrict)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "AttendanceNetworkRule" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:77[0m
+[1;94m   | [0m
+[1;94m76 | [0m requireOfficeIp Boolean @default(false)
+[1;94m77 | [0m attendanceNetworkRule [1;91mAttendanceNetworkRule[0m @default(GPS)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "PayrollCycle" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:85[0m
+[1;94m   | [0m
+[1;94m84 | [0m alphaDeductionPerDay BigInt @default(0)
+[1;94m85 | [0m defaultPayrollCycle [1;91mPayrollCycle[0m @default(A)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:91[0m
+[1;94m   | [0m
+[1;94m90 | [0m updatedAt DateTime @updatedAt
+[1;94m91 | [0m client [1;91mClient[0m @relation(fields:[clientId],references:[id],onDelete:Cascade)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Role" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:98[0m
+[1;94m   | [0m
+[1;94m97 | [0m passwordHash String @db.VarChar(255)
+[1;94m98 | [0m role [1;91mRole[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:109[0m
+[1;94m   | [0m
+[1;94m108 | [0m updatedAt DateTime @updatedAt
+[1;94m109 | [0m client [1;91mClient[0m? @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "PayrollCycle" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:130[0m
+[1;94m   | [0m
+[1;94m129 | [0m noTelp String? @db.VarChar(40)
+[1;94m130 | [0m siklusGaji [1;91mPayrollCycle[0m @default(A)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:134[0m
+[1;94m   | [0m
+[1;94m133 | [0m updatedAt DateTime @updatedAt
+[1;94m134 | [0m client [1;91mClient[0m @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:156[0m
+[1;94m   | [0m
+[1;94m155 | [0m isActive Boolean @default(true)
+[1;94m156 | [0m client [1;91mClient[0m @relation(fields:[clientId],references:[id],onDelete:Cascade)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:166[0m
+[1;94m   | [0m
+[1;94m165 | [0m isActive Boolean @default(true)
+[1;94m166 | [0m client [1;91mClient[0m @relation(fields:[clientId],references:[id],onDelete:Cascade)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "AttendanceStatus" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:177[0m
+[1;94m   | [0m
+[1;94m176 | [0m checkOutAt DateTime?
+[1;94m177 | [0m status [1;91mAttendanceStatus[0m @default(HADIR)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "AttendanceSource" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:184[0m
+[1;94m   | [0m
+[1;94m183 | [0m suspiciousFlags Json?
+[1;94m184 | [0m source [1;91mAttendanceSource[0m @default(WEB)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:188[0m
+[1;94m   | [0m
+[1;94m187 | [0m updatedAt DateTime @updatedAt
+[1;94m188 | [0m client [1;91mClient[0m @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "AttendanceStatus" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:201[0m
+[1;94m   | [0m
+[1;94m200 | [0m requestedDate DateTime @db.Date
+[1;94m201 | [0m requestedStatus [1;91mAttendanceStatus[0m?
+[1;94m   | [0m
+[1;91merror[0m: [1mType "RequestStatus" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:205[0m
+[1;94m   | [0m
+[1;94m204 | [0m reason String @db.Text
+[1;94m205 | [0m status [1;91mRequestStatus[0m @default(MENUNGGU)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "LeaveUnit" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:217[0m
+[1;94m   | [0m
+[1;94m216 | [0m name String @db.VarChar(100)
+[1;94m217 | [0m unit [1;91mLeaveUnit[0m @default(HARI)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:221[0m
+[1;94m   | [0m
+[1;94m220 | [0m isActive Boolean @default(true)
+[1;94m221 | [0m client [1;91mClient[0m @relation(fields:[clientId],references:[id],onDelete:Cascade)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "RequestStatus" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:234[0m
+[1;94m   | [0m
+[1;94m233 | [0m attachmentPath String? @db.VarChar(500)
+[1;94m234 | [0m status [1;91mRequestStatus[0m @default(MENUNGGU)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:264[0m
+[1;94m   | [0m
+[1;94m263 | [0m isNational Boolean @default(false)
+[1;94m264 | [0m client [1;91mClient[0m @relation(fields:[clientId],references:[id],onDelete:Cascade)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "PayrollCycle" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:272[0m
+[1;94m   | [0m
+[1;94m271 | [0m periodCode String @db.VarChar(40)
+[1;94m272 | [0m cycle [1;91mPayrollCycle[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mType "PayrollStatus" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:275[0m
+[1;94m   | [0m
+[1;94m274 | [0m endDate DateTime @db.Date
+[1;94m275 | [0m status [1;91mPayrollStatus[0m @default(DRAFT)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:283[0m
+[1;94m   | [0m
+[1;94m282 | [0m updatedAt DateTime @updatedAt
+[1;94m283 | [0m client [1;91mClient[0m @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m   | [0m
+[1;91merror[0m: [1mType "AuditAction" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:327[0m
+[1;94m   | [0m
+[1;94m326 | [0m actorId String?
+[1;94m327 | [0m action [1;91mAuditAction[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:335[0m
+[1;94m   | [0m
+[1;94m334 | [0m createdAt DateTime @default(now())
+[1;94m335 | [0m client [1;91mClient[0m? @relation(fields:[clientId],references:[id],onDelete:SetNull)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: An enum must have at least one value.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:356[0m
+[1;94m   | [0m
+[1;94m355 | [0m// Activation requires operator-reviewed mapping and reconciliation.
+[1;94m356 | [0m[1;91menum IntegrationState { DISABLED PENDING ACTIVE SUSPENDED }[0m
+[1;94m357 | [0mmodel IntegrationConnection {
+[1;94m358 | [0m id String @id @default(cuid())
+[1;94m359 | [0m clientId String @unique
+[1;94m360 | [0m externalTenantId String @db.VarChar(191)
+[1;94m361 | [0m state IntegrationState @default(DISABLED)
+[1;94m362 | [0m payrollOwner String @default("ELRISE") @db.VarChar(20)
+[1;94m363 | [0m verifiedAt DateTime?
+[1;94m364 | [0m createdAt DateTime @default(now())
+[1;94m365 | [0m updatedAt DateTime @updatedAt
+[1;94m366 | [0m client Client @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m367 | [0m employees IntegrationEmployeeMap[]
+[1;94m368 | [0m @@unique([externalTenantId])
+[1;94m369 | [0m}
+[1;94m   | [0m
+[1;91merror[0m: [1mType "IntegrationConnection" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:378[0m
+[1;94m   | [0m
+[1;94m377 | [0m updatedAt DateTime @updatedAt
+[1;94m378 | [0m connection [1;91mIntegrationConnection[0m @relation(fields:[connectionId],references:[id],onDelete:Restrict)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: An enum must have at least one value.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:384[0m
+[1;94m   | [0m
+[1;94m383 | [0m// Phase H: durable delivery queue. Created only in same transaction as a verified PAID transition.
+[1;94m384 | [0m[1;91menum IntegrationDeliveryStatus { PENDING IN_FLIGHT ACKNOWLEDGED RETRY DEAD_LETTER }[0m
+[1;94m385 | [0mmodel IntegrationSettlementOutbox {
+[1;94m386 | [0m id String @id @default(cuid())
+[1;94m387 | [0m clientId String @db.VarChar(191)
+[1;94m388 | [0m eventId String @unique @db.VarChar(191)
+[1;94m389 | [0m gajikuTxId String @db.VarChar(191)
+[1;94m390 | [0m payrollItemId String @db.VarChar(191)
+[1;94m391 | [0m externalTenantId String @db.VarChar(191)
+[1;94m392 | [0m externalEmployeeId String @db.VarChar(191)
+[1;94m393 | [0m amount BigInt
+[1;94m394 | [0m payload Json
+[1;94m395 | [0m payloadHash String @db.Char(64)
+[1;94m396 | [0m status IntegrationDeliveryStatus @default(PENDING)
+[1;94m397 | [0m attempts Int @default(0)
+[1;94m398 | [0m nextAttemptAt DateTime @default(now())
+[1;94m399 | [0m lastError String? @db.VarChar(500)
+[1;94m400 | [0m acknowledgedAt DateTime?
+[1;94m401 | [0m createdAt DateTime @default(now())
+[1;94m402 | [0m updatedAt DateTime @updatedAt
+[1;94m403 | [0m @@unique([clientId,gajikuTxId])
+[1;94m404 | [0m @@index([status,nextAttemptAt])
+[1;94m405 | [0m @@index([clientId,status])
+[1;94m406 | [0m}
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: An enum must have at least one value.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:410[0m
+[1;94m   | [0m
+[1;94m409 | [0m// Existing tenants default to ELRISE_ONLY. Gajiku-only is never provisioned here.
+[1;94m410 | [0m[1;91menum BundleProductMode { ELRISE_ONLY BUNDLE }[0m
+[1;94m411 | [0menum LoanCeilingMode { PERCENT_OF_PRE_KASBON_THP FIXED_IDR }
+[1;94m412 | [0mmodel BundleSubscription {
+[1;94m413 | [0m id String @id @default(cuid())
+[1;94m414 | [0m clientId String @unique
+[1;94m415 | [0m mode BundleProductMode @default(ELRISE_ONLY)
+[1;94m416 | [0m effectiveAt DateTime
+[1;94m417 | [0m provisionedByUserId String
+[1;94m418 | [0m activatedAt DateTime?
+[1;94m419 | [0m createdAt DateTime @default(now())
+[1;94m420 | [0m updatedAt DateTime @updatedAt
+[1;94m421 | [0m client Client @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m422 | [0m @@index([mode,effectiveAt])
+[1;94m423 | [0m}
+[1;94m   | [0m
+[1;91merror[0m: [1mType "LoanCeilingMode" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:428[0m
+[1;94m   | [0m
+[1;94m427 | [0m pegawaiId String? // NULL = tenant-wide default, else employee override
+[1;94m428 | [0m mode [1;91mLoanCeilingMode[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Client" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:435[0m
+[1;94m   | [0m
+[1;94m434 | [0m createdAt DateTime @default(now())
+[1;94m435 | [0m client [1;91mClient[0m @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating model "User": The index definition refers to the relation fields role. Index definitions must reference only 
+scalar fields.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:112[0m
+[1;94m   | [0m
+[1;94m111 | [0m auditLogs AuditLog[]
+[1;94m112 | [0m [1;91m@@index([clientId,role,isActive])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating model "Attendance": The index definition refers to the relation fields status. Index definitions must reference 
+only scalar fields.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:192[0m
+[1;94m   | [0m
+[1;94m191 | [0m @@unique([pegawaiId,tanggal])
+[1;94m192 | [0m [1;91m@@index([clientId,tanggal,status])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating model "AttendanceCorrection": The index definition refers to the relation fields status. Index definitions must 
+reference only scalar fields.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:211[0m
+[1;94m   | [0m
+[1;94m210 | [0m pegawai Pegawai @relation(fields:[pegawaiId],references:[id],onDelete:Restrict)
+[1;94m211 | [0m [1;91m@@index([clientId,status,requestedDate])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating model "LeaveRequest": The index definition refers to the relation fields status. Index definitions must reference 
+only scalar fields.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:242[0m
+[1;94m   | [0m
+[1;94m241 | [0m leaveType LeaveType @relation(fields:[leaveTypeId],references:[id],onDelete:Restrict)
+[1;94m242 | [0m [1;91m@@index([clientId,status,startDate,endDate])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating model "PayrollPeriod": The index definition refers to the relation fields status. Index definitions must reference 
+only scalar fields.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:286[0m
+[1;94m   | [0m
+[1;94m285 | [0m @@unique([clientId,periodCode,cycle])
+[1;94m286 | [0m [1;91m@@index([clientId,status,startDate])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating model "PayrollPeriod": The unique index definition refers to the relation fields cycle. Index definitions must 
+reference only scalar fields.[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:285[0m
+[1;94m   | [0m
+[1;94m284 | [0m items PayrollItem[]
+[1;94m285 | [0m [1;91m@@unique([clientId,periodCode,cycle])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mAttribute not known: "@unique".[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:368[0m
+[1;94m   | [0m
+[1;94m367 | [0m employees IntegrationEmployeeMap[]
+[1;94m368 | [0m [1;91m@@unique([externalTenantId])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mAttribute not known: "@unique".[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:403[0m
+[1;94m   | [0m
+[1;94m402 | [0m updatedAt DateTime @updatedAt
+[1;94m403 | [0m [1;91m@@unique([clientId,gajikuTxId])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mAttribute not known: "@index".[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:405[0m
+[1;94m   | [0m
+[1;94m404 | [0m @@index([status,nextAttemptAt])
+[1;94m405 | [0m [1;91m@@index([clientId,status])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mAttribute not known: "@index".[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:404[0m
+[1;94m   | [0m
+[1;94m403 | [0m @@unique([clientId,gajikuTxId])
+[1;94m404 | [0m [1;91m@@index([status,nextAttemptAt])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mAttribute not known: "@index".[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:422[0m
+[1;94m   | [0m
+[1;94m421 | [0m client Client @relation(fields:[clientId],references:[id],onDelete:Restrict)
+[1;94m422 | [0m [1;91m@@index([mode,effectiveAt])[0m
+[1;94m   | [0m
+[1;91merror[0m: [1mArgument "provider" is missing in generator block "client".[0m
+  [1;94m-->[0m  [4mprisma\schema.prisma:1[0m
+[1;94m   | [0m
+[1;94m   | [0m
+[1;94m 1 | [0m[1;91mgenerator client { provider = "prisma-client-js" }[0m
+[1;94m 2 | [0mdatasource db { provider = "mysql" url = env("DATABASE_URL") }
+[1;94m 3 | [0m
+[1;94m 4 | [0menum Role { SUPERADMIN ADMIN PEGAWAI }
+[1;94m 5 | [0menum ClientStatus { AKTIF SUSPEND NONAKTIF }
+[1;94m 6 | [0menum AttendanceStatus { HADIR TELAT ALPHA CUTI IZIN DINAS LIBUR }
+[1;94m 7 | [0menum AttendanceSource { WEB MOBILE ADMIN_CORRECTION }
+[1;94m 8 | [0menum RequestStatus { MENUNGGU DISETUJUI DITOLAK DIBATALKAN }
+[1;94m 9 | [0menum PayrollStatus { DRAFT REVIEW LOCKED PAID }
+[1;94m10 | [0menum PayrollCycle { A B C D }
+[1;94m11 | [0menum AttendanceNetworkRule { GPS IP GPS_DAN_IP GPS_ATAU_IP }
+[1;94m12 | [0menum LeaveUnit { HARI JAM }
+[1;94m13 | [0menum AuditAction { CREATE UPDATE DELETE LOGIN LOGOUT APPROVE REJECT LOCK PAY }
+[1;94m14 | [0m
+[1;94m15 | [0mmodel Client {
+[1;94m16 | [0m id String @id @default(cuid())
+[1;94m17 | [0m code String @unique @db.VarChar(40)
+[1;94m18 | [0m name String @db.VarChar(180)
+[1;94m19 | [0m address String? @db.Text
+[1;94m20 | [0m contactEmail String? @db.VarChar(191)
+[1;94m21 | [0m contactPhone String? @db.VarChar(40)
+[1;94m22 | [0m picName String? @db.VarChar(120)
+[1;94m23 | [0m status ClientStatus @default(AKTIF)
+[1;94m24 | [0m brandColor String? @db.VarChar(20)
+[1;94m25 | [0m createdAt DateTime @default(now())
+[1;94m26 | [0m updatedAt DateTime @updatedAt
+[1;94m27 | [0m projects Project[]
+[1;94m28 | [0m setting ClientSetting?
+[1;94m29 | [0m users User[]
+[1;94m30 | [0m employees Pegawai[]
+[1;94m31 | [0m officeLocations OfficeLocation[]
+[1;94m32 | [0m officeIps OfficeIp[]
+[1;94m33 | [0m attendances Attendance[]
+[1;94m34 | [0m leaveTypes LeaveType[]
+[1;94m35 | [0m leaveRequests LeaveRequest[]
+[1;94m36 | [0m leaveBalances LeaveBalance[]
+[1;94m37 | [0m holidays Holiday[]
+[1;94m38 | [0m payrollPeriods PayrollPeriod[]
+[1;94m39 | [0m auditLogs AuditLog[]
+[1;94m40 | [0m integrationConnection IntegrationConnection?
+[1;94m41 | [0m bundleSubscription BundleSubscription?
+[1;94m42 | [0m loanPolicies BundleLoanPolicy[]
+[1;94m43 | [0m @@index([status])
+[1;94m44 | [0m}
+[1;94m   | [0m
+
+Validation Error Count: 122
+[Context: validate]
+
+Prisma CLI Version : 6.19.3

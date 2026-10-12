@@ -1,0 +1,581 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  PEGAWAI
+}
+
+enum ClientStatus {
+  AKTIF
+  SUSPEND
+  NONAKTIF
+}
+
+enum AttendanceStatus {
+  HADIR
+  TELAT
+  ALPHA
+  CUTI
+  IZIN
+  DINAS
+  LIBUR
+}
+
+enum AttendanceSource {
+  WEB
+  MOBILE
+  ADMIN_CORRECTION
+}
+
+enum RequestStatus {
+  MENUNGGU
+  DISETUJUI
+  DITOLAK
+  DIBATALKAN
+}
+
+enum PayrollStatus {
+  DRAFT
+  REVIEW
+  LOCKED
+  PAID
+}
+
+enum PayrollCycle {
+  A
+  B
+  C
+  D
+}
+
+enum AttendanceNetworkRule {
+  GPS
+  IP
+  GPS_DAN_IP
+  GPS_ATAU_IP
+}
+
+enum LeaveUnit {
+  HARI
+  JAM
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  APPROVE
+  REJECT
+  LOCK
+  PAY
+}
+
+model Client {
+  id                    String                 @id @default(cuid())
+  code                  String                 @unique @db.VarChar(40)
+  name                  String                 @db.VarChar(180)
+  address               String?                @db.Text
+  contactEmail          String?                @db.VarChar(191)
+  contactPhone          String?                @db.VarChar(40)
+  picName               String?                @db.VarChar(120)
+  status                ClientStatus           @default(AKTIF)
+  brandColor            String?                @db.VarChar(20)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  projects              Project[]
+  setting               ClientSetting?
+  users                 User[]
+  employees             Pegawai[]
+  officeLocations       OfficeLocation[]
+  officeIps             OfficeIp[]
+  attendances           Attendance[]
+  leaveTypes            LeaveType[]
+  leaveRequests         LeaveRequest[]
+  leaveBalances         LeaveBalance[]
+  holidays              Holiday[]
+  payrollPeriods        PayrollPeriod[]
+  auditLogs             AuditLog[]
+  integrationConnection IntegrationConnection?
+  bundleSubscription    BundleSubscription?
+  loanPolicies          BundleLoanPolicy[]
+
+  @@index([status])
+}
+
+model Project {
+  id              String           @id @default(cuid())
+  clientId        String
+  code            String           @db.VarChar(50)
+  name            String           @db.VarChar(180)
+  address         String?          @db.Text
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  client          Client           @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  employees       Pegawai[]
+  officeLocations OfficeLocation[]
+  attendances     Attendance[]
+
+  @@unique([clientId, code])
+  @@unique([clientId, name])
+  @@index([clientId, isActive])
+}
+
+model ClientSetting {
+  id                       String                @id @default(cuid())
+  clientId                 String                @unique
+  attendanceEnabled        Boolean               @default(true)
+  leaveEnabled             Boolean               @default(true)
+  payrollEnabled           Boolean               @default(true)
+  kasbonGajikuEnabled      Boolean               @default(false)
+  workStart                String                @default("08:00") @db.VarChar(5)
+  workEnd                  String                @default("17:00") @db.VarChar(5)
+  lateToleranceMinutes     Int                   @default(0)
+  workDays                 Json
+  holidays                 Json
+  requireSelfie            Boolean               @default(true)
+  requireGps               Boolean               @default(true)
+  requireOfficeIp          Boolean               @default(false)
+  attendanceNetworkRule    AttendanceNetworkRule @default(GPS)
+  kasbonStartPeriod        String?               @db.VarChar(7)
+  kasbonPlafonPercent      Int                   @default(20) // % dari gaji pokok yang menjadi plafon pinjaman di Gajiku (0-100)
+  kasbonWeeklyCutoffDay    Int? // 0=Senin..6=Minggu; null = kasbon bulanan mengikuti siklus pegawai
+  gpsRadiusMeters          Int                   @default(100)
+  maxGpsAccuracyMeters     Int                   @default(100)
+  annualLeaveQuota         Int                   @default(12)
+  alphaDeductionPerDay     BigInt                @default(0)
+  defaultPayrollCycle      PayrollCycle          @default(A)
+  fixedAllowanceEnabled    Boolean               @default(false)
+  mealAllowancePerDay      BigInt                @default(0)
+  transportAllowancePerDay BigInt                @default(0)
+  overtimeEnabled          Boolean               @default(false)
+  updatedAt                DateTime              @updatedAt
+  client                   Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                 String     @id @default(cuid())
+  email              String     @unique @db.VarChar(191)
+  name               String     @db.VarChar(180)
+  passwordHash       String     @db.VarChar(255)
+  role               Role
+  clientId           String?
+  pegawaiId          String?    @unique
+  isActive           Boolean    @default(true)
+  mustChangePassword Boolean    @default(true)
+  tokenVersion       Int        @default(0)
+  lastLoginAt        DateTime?
+  failedLoginCount   Int        @default(0)
+  lockedUntil        DateTime?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  client             Client?    @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  pegawai            Pegawai?   @relation(fields: [pegawaiId], references: [id], onDelete: SetNull)
+  auditLogs          AuditLog[]
+
+  @@index([clientId, role, isActive])
+}
+
+model Pegawai {
+  id                     String                  @id @default(cuid())
+  idPegawai              String                  @unique @db.VarChar(80)
+  clientId               String
+  projectId              String
+  nama                   String                  @db.VarChar(180)
+  email                  String                  @db.VarChar(191)
+  jabatan                String?                 @db.VarChar(120)
+  perusahaan             String?                 @db.VarChar(180)
+  perusahaanInduk        String?                 @db.VarChar(180)
+  gajiPokok              BigInt                  @default(0)
+  isActive               Boolean                 @default(true)
+  noRekening             String?                 @db.VarChar(80)
+  rekeningLain           String?                 @db.VarChar(120)
+  eWallet                String?                 @db.VarChar(120)
+  noTelp                 String?                 @db.VarChar(40)
+  siklusGaji             PayrollCycle            @default(A)
+  tanggalMasuk           DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  client                 Client                  @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  project                Project                 @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  user                   User?
+  attendances            Attendance[]
+  corrections            AttendanceCorrection[]
+  leaveRequests          LeaveRequest[]
+  leaveBalances          LeaveBalance[]
+  payrollItems           PayrollItem[]
+  integrationEmployeeMap IntegrationEmployeeMap?
+
+  @@unique([clientId, email])
+  @@index([clientId, projectId, isActive])
+  @@index([clientId, nama])
+}
+
+model OfficeLocation {
+  id        String   @id @default(cuid())
+  clientId  String
+  projectId String?
+  name      String   @db.VarChar(120)
+  lat       Decimal  @db.Decimal(10, 7)
+  lng       Decimal  @db.Decimal(10, 7)
+  radiusM   Int      @default(100)
+  isActive  Boolean  @default(true)
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, projectId, isActive])
+}
+
+model OfficeIp {
+  id        String  @id @default(cuid())
+  clientId  String
+  ipAddress String  @db.VarChar(45)
+  label     String? @db.VarChar(120)
+  isActive  Boolean @default(true)
+  client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, ipAddress])
+}
+
+model Attendance {
+  id              String           @id @default(cuid())
+  clientId        String
+  projectId       String
+  pegawaiId       String
+  tanggal         DateTime         @db.Date
+  checkInAt       DateTime?
+  checkOutAt      DateTime?
+  status          AttendanceStatus @default(HADIR)
+  selfiePath      String?          @db.VarChar(500)
+  lat             Decimal?         @db.Decimal(10, 7)
+  lng             Decimal?         @db.Decimal(10, 7)
+  accuracyM       Decimal?         @db.Decimal(8, 2)
+  ip              String?          @db.VarChar(45)
+  suspiciousFlags Json?
+  source          AttendanceSource @default(WEB)
+  validatedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  client          Client           @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  project         Project          @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  pegawai         Pegawai          @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+
+  @@unique([pegawaiId, tanggal])
+  @@index([clientId, tanggal, status])
+  @@index([projectId, tanggal])
+}
+
+model AttendanceCorrection {
+  id                String            @id @default(cuid())
+  clientId          String
+  pegawaiId         String
+  attendanceId      String?
+  requestedDate     DateTime          @db.Date
+  requestedStatus   AttendanceStatus?
+  requestedCheckIn  DateTime?
+  requestedCheckOut DateTime?
+  reason            String            @db.Text
+  status            RequestStatus     @default(MENUNGGU)
+  reviewedById      String?
+  reviewedAt        DateTime?
+  reviewReason      String?           @db.Text
+  createdAt         DateTime          @default(now())
+  pegawai           Pegawai           @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+
+  @@index([clientId, status, requestedDate])
+}
+
+model LeaveType {
+  id          String         @id @default(cuid())
+  clientId    String
+  name        String         @db.VarChar(100)
+  unit        LeaveUnit      @default(HARI)
+  paid        Boolean        @default(true)
+  annualQuota Int?
+  isActive    Boolean        @default(true)
+  client      Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  requests    LeaveRequest[]
+
+  @@unique([clientId, name])
+}
+
+model LeaveRequest {
+  id             String        @id @default(cuid())
+  clientId       String
+  pegawaiId      String
+  leaveTypeId    String
+  startDate      DateTime      @db.Date
+  endDate        DateTime      @db.Date
+  reason         String        @db.Text
+  attachmentPath String?       @db.VarChar(500)
+  status         RequestStatus @default(MENUNGGU)
+  reviewedById   String?
+  reviewedAt     DateTime?
+  reviewReason   String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  pegawai        Pegawai       @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+  leaveType      LeaveType     @relation(fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  client         Client        @relation(fields: [clientId], references: [id])
+
+  @@index([clientId, status, startDate, endDate])
+  @@index([pegawaiId, startDate, endDate])
+}
+
+model LeaveBalance {
+  id          String   @id @default(cuid())
+  clientId    String
+  pegawaiId   String
+  leaveTypeId String
+  year        Int
+  quota       Int
+  used        Int      @default(0)
+  updatedAt   DateTime @updatedAt
+  pegawai     Pegawai  @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+  client      Client   @relation(fields: [clientId], references: [id])
+
+  @@unique([pegawaiId, leaveTypeId, year])
+  @@index([clientId, year])
+}
+
+model Holiday {
+  id         String   @id @default(cuid())
+  clientId   String
+  date       DateTime @db.Date
+  name       String   @db.VarChar(180)
+  isNational Boolean  @default(false)
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, date])
+}
+
+model PayrollPeriod {
+  id          String        @id @default(cuid())
+  clientId    String
+  name        String        @db.VarChar(120)
+  periodCode  String        @db.VarChar(40)
+  cycle       PayrollCycle
+  startDate   DateTime      @db.Date
+  endDate     DateTime      @db.Date
+  status      PayrollStatus @default(DRAFT)
+  createdById String
+  lockedById  String?
+  lockedAt    DateTime?
+  paidById    String?
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  items       PayrollItem[]
+
+  @@unique([clientId, periodCode, cycle])
+  @@index([clientId, status, startDate])
+}
+
+model PayrollItem {
+  id                 String             @id @default(cuid())
+  payrollPeriodId    String
+  pegawaiId          String
+  gajiPokok          BigInt             @default(0)
+  tunjanganTetap     BigInt             @default(0)
+  tunjanganMakan     BigInt             @default(0)
+  tunjanganTransport BigInt             @default(0)
+  lembur             BigInt             @default(0)
+  potonganAlpha      BigInt             @default(0)
+  kasbonDeduction    BigInt             @default(0)
+  potonganLain       BigInt             @default(0)
+  bruto              BigInt             @default(0)
+  totalPotongan      BigInt             @default(0)
+  neto               BigInt             @default(0)
+  hadirDays          Int                @default(0)
+  alphaDays          Int                @default(0)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  period             PayrollPeriod      @relation(fields: [payrollPeriodId], references: [id], onDelete: Cascade)
+  pegawai            Pegawai            @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+  settlements        KasbonSettlement[]
+
+  @@unique([payrollPeriodId, pegawaiId])
+  @@index([pegawaiId, payrollPeriodId])
+}
+
+model KasbonSettlement {
+  id            String      @id @default(cuid())
+  gajikuTxId    String      @unique @db.VarChar(191)
+  payrollItemId String
+  nominal       BigInt
+  adminFee      BigInt
+  settledAt     DateTime    @default(now())
+  payrollItem   PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Restrict)
+
+  @@index([settledAt])
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  clientId  String?
+  actorId   String?
+  action    AuditAction
+  entity    String      @db.VarChar(100)
+  entityId  String?     @db.VarChar(191)
+  oldValue  Json?
+  newValue  Json?
+  ip        String?     @db.VarChar(45)
+  userAgent String?     @db.VarChar(500)
+  createdAt DateTime    @default(now())
+  client    Client?     @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  actor     User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([clientId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([entity, entityId])
+}
+
+// Fingerprint hash saja yang disimpan; jangan simpan IP/email mentah di tabel throttle.
+model LoginThrottle {
+  id              String    @id @default(cuid())
+  fingerprint     String    @unique @db.Char(64)
+  attempts        Int       @default(0)
+  windowStartedAt DateTime  @default(now())
+  blockedUntil    DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  @@index([blockedUntil])
+}
+
+// Phase A/B: tenant-scoped explicit identity mappings. No live synchronization enabled.
+// Activation requires operator-reviewed mapping and reconciliation.
+enum IntegrationState {
+  DISABLED
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+model IntegrationConnection {
+  id               String                   @id @default(cuid())
+  clientId         String                   @unique
+  externalTenantId String                   @db.VarChar(191)
+  state            IntegrationState         @default(DISABLED)
+  payrollOwner     String                   @default("ELRISE") @db.VarChar(20)
+  verifiedAt       DateTime?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  client           Client                   @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  employees        IntegrationEmployeeMap[]
+
+  @@unique([externalTenantId])
+}
+
+model IntegrationEmployeeMap {
+  id                 String                @id @default(cuid())
+  connectionId       String
+  pegawaiId          String                @unique
+  externalEmployeeId String                @db.VarChar(191)
+  verifiedAt         DateTime?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  connection         IntegrationConnection @relation(fields: [connectionId], references: [id], onDelete: Restrict)
+  pegawai            Pegawai               @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+
+  @@unique([connectionId, externalEmployeeId])
+}
+
+// Phase H: durable delivery queue. Created only in same transaction as a verified PAID transition.
+enum IntegrationDeliveryStatus {
+  PENDING
+  IN_FLIGHT
+  ACKNOWLEDGED
+  RETRY
+  DEAD_LETTER
+}
+
+model IntegrationSettlementOutbox {
+  id                 String                    @id @default(cuid())
+  clientId           String                    @db.VarChar(191)
+  eventId            String                    @unique @db.VarChar(191)
+  gajikuTxId         String                    @db.VarChar(191)
+  payrollItemId      String                    @db.VarChar(191)
+  externalTenantId   String                    @db.VarChar(191)
+  externalEmployeeId String                    @db.VarChar(191)
+  amount             BigInt
+  payload            Json
+  payloadHash        String                    @db.Char(64)
+  status             IntegrationDeliveryStatus @default(PENDING)
+  attempts           Int                       @default(0)
+  nextAttemptAt      DateTime                  @default(now())
+  lastError          String?                   @db.VarChar(500)
+  acknowledgedAt     DateTime?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+
+  @@unique([clientId, gajikuTxId])
+  @@index([status, nextAttemptAt])
+  @@index([clientId, status])
+}
+
+// Phase J: Elrise owns bundle entitlement and effective-dated loan policies.
+// Existing tenants default to ELRISE_ONLY. Gajiku-only is never provisioned here.
+enum BundleProductMode {
+  ELRISE_ONLY
+  BUNDLE
+}
+
+enum LoanCeilingMode {
+  PERCENT_OF_PRE_KASBON_THP
+  FIXED_IDR
+}
+
+model BundleSubscription {
+  id                  String            @id @default(cuid())
+  clientId            String            @unique
+  mode                BundleProductMode @default(ELRISE_ONLY)
+  effectiveAt         DateTime
+  provisionedByUserId String
+  activatedAt         DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  client              Client            @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@index([mode, effectiveAt])
+}
+
+model BundleLoanPolicy {
+  id              String          @id @default(cuid())
+  clientId        String
+  pegawaiId       String? // NULL = tenant-wide default, else employee override
+  mode            LoanCeilingMode
+  percentBps      Int? // 0..10000 = 0..100%, avoids floating point
+  fixedAmount     BigInt?
+  denominatorDays Int // Admin PT configurable, 1..366
+  effectiveAt     DateTime
+  createdByUserId String
+  createdAt       DateTime        @default(now())
+  client          Client          @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@index([clientId, pegawaiId, effectiveAt])
+}
+
+// Single-purpose, single-use employee invitation. No queue, Redis or external auth service.
+model EmployeeInvitation {
+  id        String    @id @default(cuid())
+  userId    String
+  clientId  String
+  tokenHash String    @unique @db.Char(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, usedAt])
+  @@index([clientId, createdAt])
+}
