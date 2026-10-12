@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
 type Employee = {
@@ -18,22 +18,23 @@ export default function AdminPegawaiPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [invite, setInvite] = useState<{email:string; token:string; expiresAt:string}|null>(null);
   const [limited, setLimited] = useState(false);
+  const [page,setPage] = useState(1);
+  const [pages,setPages] = useState(1);
+  const [total,setTotal] = useState(0);
 
   const refresh = useCallback(async () => {
     setLoading(true); setError("");
     try {
-      const res = await fetch("/api/admin/employees", { cache: "no-store" });
+      const res = await fetch("/api/admin/employees?q="+encodeURIComponent(search)+"&page="+page, { cache: "no-store" });
       if (!res.ok) throw new Error("Gagal mengambil data karyawan. Periksa sesi login.");
       const data = await res.json();
-      setEmployees(data.employees); setLimited(Boolean(data.limited));
+      setEmployees(data.employees); setLimited(Boolean(data.limited));setPages(Math.max(1,data.pages||1));setTotal(data.total||0);
     } catch (e) { setError(e instanceof Error ? e.message : "Gagal mengambil data"); }
     finally { setLoading(false); }
-  }, []);
-  useEffect(() => { void refresh(); }, [refresh]);
+  }, [search,page]);
+  useEffect(() => { const wait=setTimeout(()=>{void refresh();},250); return ()=>clearTimeout(wait); }, [refresh]);
 
-  const visible = useMemo(() => employees.filter(e =>
-    [e.name,e.code,e.email,e.position,e.project].some(v=>v.toLowerCase().includes(search.toLowerCase()))
-  ), [employees, search]);
+  const visible = employees;
 
   async function issueInvite(employee: Employee) {
     if (!window.confirm(`Buat undangan aktivasi untuk ${employee.name} (${employee.email})?`)) return;
@@ -72,10 +73,10 @@ export default function AdminPegawaiPage() {
         <button className="rounded border px-3 py-2 text-sm" onClick={()=>void navigator.clipboard.writeText(activationLink)}>Salin tautan</button>
         <button className="ml-2 text-sm underline" onClick={()=>setInvite(null)}>Tutup</button>
       </section>}
-      <input value={search} onChange={e=>setSearch(e.target.value)}
-        placeholder="Cari nama, email, ID, jabatan, atau proyek"
+      <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}}
+        placeholder="Cari nama, email, ID, atau jabatan"
         aria-label="Cari karyawan" className="w-full rounded-lg border p-3 text-sm" />
-      {limited && <p className="text-amber-700 text-sm">Hanya 500 karyawan pertama ditampilkan. Pagination server diperlukan untuk tenant lebih besar.</p>}
+      <p className="text-sm opacity-70">{total} pegawai ditemukan. {limited?"Ada halaman berikutnya.":""}</p>
       {loading ? <p>Memuat karyawan...</p> :
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full text-left text-sm">
@@ -99,6 +100,11 @@ export default function AdminPegawaiPage() {
           </table>
           {!visible.length && <p className="p-5 text-sm">Tidak ada karyawan yang cocok.</p>}
         </div>}
+      <div className="flex gap-3 items-center">
+        <button className="rounded border px-3 py-1 disabled:opacity-50" disabled={loading||page<=1} onClick={()=>setPage(p=>p-1)}>Sebelumnya</button>
+        <span className="text-sm">{page} / {pages}</span>
+        <button className="rounded border px-3 py-1 disabled:opacity-50" disabled={loading||page>=pages} onClick={()=>setPage(p=>p+1)}>Berikutnya</button>
+      </div>
       <p className="text-xs opacity-60">Nilai gaji di tabel adalah gaji pokok, bukan THP untuk perhitungan plafon pinjaman.</p>
     </main>
   );
