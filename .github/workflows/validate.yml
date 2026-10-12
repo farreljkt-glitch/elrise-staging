@@ -58,6 +58,7 @@ jobs:
           --health-retries=15
     env:
       DATABASE_URL: mysql://elrise_ci:ci_password_only@127.0.0.1:3306/elrise_ci
+      AUTH_SECRET: ci-only-placeholder-secret-at-least-32-bytes-long
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -74,3 +75,18 @@ jobs:
         run: node integration/scripts/q6-schema-smoke.cjs
       - name: Exercise disposable MySQL transactions and unique keys
         run: node integration/scripts/q11-mysql-transactions.cjs
+      - name: Boot isolated Next.js HTTP server
+        run: |
+          npm run dev -- --hostname 127.0.0.1 > /tmp/elrise-q12-next.log 2>&1 &
+          echo $! > /tmp/elrise-q12-next.pid
+          for i in $(seq 1 60); do
+            if curl --silent --fail http://127.0.0.1:3000/login > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/elrise-q12-next.log
+          exit 1
+      - name: Test real HTTP session and tenant isolation
+        run: node integration/scripts/q12-http-isolation.cjs
+      - name: Stop test server
+        if: always()
+        run: if test -f /tmp/elrise-q12-next.pid; then kill $(cat /tmp/elrise-q12-next.pid) || true; fi
