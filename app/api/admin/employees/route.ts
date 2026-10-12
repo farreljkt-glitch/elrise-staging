@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth-server";
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
+import { parseEmployeeSearch } from "@/lib/employees/search-validation";
 
 export const runtime = "nodejs";
-export async function GET() {
+export async function GET(request: Request) {
   const user = await getSession();
   if (!user || user.role !== "ADMIN" || !user.clientId || user.mustChangePassword)
     return NextResponse.json({ error: "Tidak diizinkan" }, { status: 403 });
+  let query: ReturnType<typeof parseEmployeeSearch>;
+  try { query = parseEmployeeSearch(request.url); }
+  catch { return NextResponse.json({error:"Parameter pencarian tidak valid"},{status:400}); }
   try {
-  const employees = await db.pegawai.findMany({
-    where: { clientId: user.clientId },
+  const where: Prisma.PegawaiWhereInput = { clientId: user.clientId,
+    ...(query.q ? { OR: [
+      { nama: { contains: query.q } }, { email: { contains: query.q } },
+      { idPegawai: { contains: query.q } }, { jabatan: { contains: query.q } },
+    ] } : {}),
+  };
+  const [total, employees] = await Promise.all([
+    db.pegawai.count({where}),
+    db.pegawai.findMany({
+    where,
     select: {
       id: true, idPegawai: true, nama: true, email: true, jabatan: true,
       gajiPokok: true, isActive: true, siklusGaji: true, tanggalMasuk: true,
@@ -17,8 +30,10 @@ export async function GET() {
       user: { select: { id: true, isActive: true, mustChangePassword: true } },
     },
     orderBy: [{ nama: "asc" }, { id: "asc" }],
-    take: 500,
-  });
+    skip: (query.page-1)*query.pageSize,
+    take: query.pageSize,
+  }),
+  ]);
   return NextResponse.json({
     employees: employees.map(e => ({
       id: e.id, code: e.idPegawai, name: e.nama, email: e.email,
@@ -29,7 +44,8 @@ export async function GET() {
       accountStatus: !e.user ? "BELUM_DIUNDANG" :
         e.user.isActive && !e.user.mustChangePassword ? "AKTIF" : "BELUM_AKTIF",
     })),
-    limited: employees.length === 500,
+    limited: query.page * query.pageSize < total,
+    total, page: query.page, pageSize: query.pageSize, pages: Math.ceil(total/query.pageSize),
   }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Employee listing failed", error instanceof Error ? error.name : "unknown");
