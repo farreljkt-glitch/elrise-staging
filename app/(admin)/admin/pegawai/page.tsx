@@ -59,6 +59,7 @@ export default function AdminPegawaiPage() {
         <div><h1 className="text-2xl font-bold">Master Pegawai</h1>
           <p className="text-sm opacity-70">Data langsung dari database PT Anda, bukan data demo.</p></div>
         <div className="flex gap-2">
+          <Link href="/admin/pegawai/tambah" className="rounded-lg bg-teal-700 px-3 py-2 text-sm text-white">Tambah Pegawai</Link>
           <button onClick={()=>void refresh()} className="rounded-lg border px-3 py-2 text-sm">Muat ulang</button>
           <Link href="/admin/pegawai/import" className="rounded-lg bg-teal-700 px-3 py-2 text-sm text-white">Import CSV</Link>
         </div>
@@ -84,11 +85,11 @@ export default function AdminPegawaiPage() {
               <th className="p-3">Akun</th><th className="p-3">Aksi</th>
             </tr></thead>
             <tbody>{visible.map(e=><tr key={e.id} className="border-b">
-              <td className="p-3"><strong>{e.name}</strong><div className="text-xs opacity-70">{e.code} · {e.email}</div></td>
+              <td className="p-3"><Link href={"/admin/pegawai/"+encodeURIComponent(e.id)} className="font-semibold underline">{e.name}</Link><div className="text-xs opacity-70">{e.code} · {e.email}</div></td>
               <td className="p-3">{e.project}</td>
               <td className="p-3">{e.cycle}</td>
               <td className="p-3">Rp{Number(e.salary).toLocaleString("id-ID")}</td>
-              <td className="p-3">{e.accountStatus === "AKTIF" ? "Aktif" : "Belum aktif"}</td>
+              <td className="p-3">{!e.active ? "Nonaktif" : e.accountStatus === "AKTIF" ? "Aktif" : "Belum aktif"}</td>
               <td className="p-3">{e.accountStatus !== "AKTIF" && e.active &&
                 <button disabled={busyId !== null} onClick={()=>void issueInvite(e)}
                   className="rounded border px-2 py-1 disabled:opacity-50">
