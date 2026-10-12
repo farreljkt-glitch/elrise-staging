@@ -2,20 +2,13 @@ import "server-only";
 import { db } from "@/lib/db";
 import { selectUnsettledKasbon } from "@/lib/payroll/settlement";
 import { validateMonthlyKasbonWindow } from "@/lib/integration/period-mapping";
+import { parseGajikuKasbon } from "@/lib/integration/gajiku-contract";
 
 export type KasbonSukses = {
   gajikuTxId: string; email: string; externalTenantId: string; idPegawai: string; periode: string; nominal: bigint;
   adminFee: bigint; status: string; finalApprovedAt: Date | null;
 };
-/** Membaca view read-only di hris_db; periode historis sebelum go-live tidak pernah ditarik.
- *  Requires verified employee mapping. Gajiku employee IDs MUST be globally unique;
- *  tenant-scoped source filtering remains a prerequisite for production. */
-type ApiKasbonItem = {
-  transaction_id: string; period: string; amount: number; admin_fee: number;
-  status: string; final_approved_at: string | null;
-};
-type ApiKasbonResponse = { tenant_id: string; employee_id: string; items: ApiKasbonItem[] };
-
+/** Integration uses a verified tenant-scoped read-only Gajiku API, never direct live SQL. */
 export async function getKasbonSukses(externalEmployeeId: string, externalTenantId: string, startPeriod: string, periodeKey: string): Promise<KasbonSukses[]> {
   const window = validateMonthlyKasbonWindow(startPeriod, periodeKey);
   const endpoint = process.env.GAJIKU_INTEGRATION_URL;
@@ -31,47 +24,28 @@ export async function getKasbonSukses(externalEmployeeId: string, externalTenant
   url.searchParams.set("end_period", window.periodeKey);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
-  let payload: ApiKasbonResponse;
+  let payload: unknown;
   try {
     const response = await fetch(url, {
       method: "GET", headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       signal: controller.signal, cache: "no-store", redirect: "error",
     });
     if (!response.ok) throw new Error(`upstream status ${response.status}`);
-    payload = await response.json() as ApiKasbonResponse;
+    payload = await response.json();
   } catch {
     throw new Error("API Gajiku gagal diakses; payroll dibatalkan tanpa fallback.");
   } finally {
     clearTimeout(timeout);
   }
-  if (payload?.tenant_id !== externalTenantId || payload?.employee_id !== externalEmployeeId ||
-      !Array.isArray(payload.items) || payload.items.length > 5000) {
-    throw new Error("Respons identitas API Gajiku tidak valid; payroll dibatalkan.");
-  }
-  const seen = new Set<string>();
-  return payload.items.map(item => {
-    if (!item || typeof item.transaction_id !== "string" || !item.transaction_id.trim() ||
-        seen.has(item.transaction_id) || typeof item.period !== "string" ||
-        item.period < window.startPeriod || item.period > window.periodeKey ||
-        item.status.toLowerCase() !== "sukses" ||
-        !Number.isSafeInteger(item.amount) || item.amount < 0 ||
-        !Number.isSafeInteger(item.admin_fee) || item.admin_fee < 0) {
-      throw new Error("Data transaksi API Gajiku tidak valid; payroll dibatalkan.");
-    }
-    seen.add(item.transaction_id);
-    const approved = item.final_approved_at ? new Date(item.final_approved_at) : null;
-    if (approved && Number.isNaN(approved.getTime())) throw new Error("Tanggal approval kasbon tidak valid.");
-    return {
-      gajikuTxId: item.transaction_id, email: "", externalTenantId,
-      idPegawai: externalEmployeeId, periode: item.period, nominal: BigInt(item.amount),
-      adminFee: BigInt(item.admin_fee), status: item.status, finalApprovedAt: approved,
-    };
+  return parseGajikuKasbon(payload,{
+    tenantId:externalTenantId,employeeId:externalEmployeeId,
+    startPeriod:window.startPeriod,endPeriod:window.periodeKey,
   });
 }
 
 export async function getUnsettledKasbon(idPegawai: string, periodeKey: string) {
   const employee = await db.pegawai.findUnique({
-    where: { idPegawai },
+    where: { id: idPegawai },
     select: { clientId: true, client: { select: { setting: { select: { kasbonGajikuEnabled: true, kasbonStartPeriod: true } } } } },
   });
   if (!employee) throw new Error("Pegawai tidak ditemukan di HRIS. Payroll dibatalkan.");
