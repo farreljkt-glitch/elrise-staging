@@ -1,197 +1,48 @@
 "use client";
-
-import React, { useState } from "react";
-import Link from "next/link";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Table, Column } from "@/components/ui/Table";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { useToast } from "@/components/ui/Toast";
-import { MOCK_CLIENTS } from "@/lib/mock-data/clients";
-import { Client } from "@/lib/types";
-import { formatDate } from "@/lib/formatters";
-import {
-  Plus,
-  Search,
-  Building2,
-  ExternalLink,
-  ShieldAlert,
-  CheckCircle,
-  FileText,
-  SlidersHorizontal,
-} from "lucide-react";
-
-export default function SuperadminKlienPage() {
-  const { showToast } = useToast();
-  const [clients, setClients] = useState<Client[]>(MOCK_CLIENTS);
-  const [search, setSearch] = useState("");
-  const [clientToSuspend, setClientToSuspend] = useState<Client | null>(null);
-
-  const filteredClients = clients.filter(
-    (c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.code.toLowerCase().includes(search.toLowerCase()) ||
-      c.picName.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const handleToggleStatus = (client: Client) => {
-    if (client.status === "AKTIF") {
-      setClientToSuspend(client);
-    } else {
-      // Aktifkan kembali
-      setClients((prev) =>
-        prev.map((c) => (c.id === client.id ? { ...c, status: "AKTIF" } : c))
-      );
-      showToast("success", "Klien Diaktifkan", `${client.name} kini berstatus aktif.`);
-    }
-  };
-
-  const confirmSuspend = () => {
-    if (!clientToSuspend) return;
-    setClients((prev) =>
-      prev.map((c) => (c.id === clientToSuspend.id ? { ...c, status: "SUSPEND" } : c))
-    );
-    showToast("warning", "Klien Ditangguhkan", `${clientToSuspend.name} telah disuspend.`);
-    setClientToSuspend(null);
-  };
-
-  const columns: Column<Client>[] = [
-    {
-      header: "Nama Perusahaan",
-      cell: (row) => (
-        <div className="flex flex-col">
-          <Link
-            href={`/superadmin/klien/${row.id}`}
-            className="font-semibold text-[var(--text-primary)] hover:text-[var(--blue)] transition-colors"
-          >
-            {row.name}
-          </Link>
-          <span className="text-xs text-[var(--text-muted)]">{row.address}</span>
-        </div>
-      ),
-    },
-    {
-      header: "Kode",
-      accessorKey: "code",
-      cell: (row) => (
-        <span className="font-mono font-bold text-[var(--teal)]">{row.code}</span>
-      ),
-    },
-    {
-      header: "Project",
-      cell: (row) => (
-        <span className="font-mono tabular-nums text-[var(--text-primary)]">{row.projectCount} Lokasi</span>
-      ),
-    },
-    {
-      header: "Pegawai",
-      cell: (row) => (
-        <span className="font-mono tabular-nums text-[var(--text-primary)]">{row.employeeCount} Orang</span>
-      ),
-    },
-    {
-      header: "Kasbon Gajiku",
-      cell: (row) => (
-        <Badge variant={row.kasbonIntegration ? "success" : "neutral"} size="sm">
-          {row.kasbonIntegration ? "Terhubung" : "Nonaktif"}
-        </Badge>
-      ),
-    },
-    {
-      header: "Status",
-      cell: (row) => (
-        <Badge
-          variant={row.status === "AKTIF" ? "success" : "danger"}
-          size="sm"
-          dot
-        >
-          {row.status}
-        </Badge>
-      ),
-    },
-    {
-      header: "Terdaftar",
-      cell: (row) => (
-        <span className="text-xs text-[var(--text-secondary)] font-mono">
-          {formatDate(row.createdAt)}
-        </span>
-      ),
-    },
-    {
-      header: "Aksi",
-      align: "right",
-      cell: (row) => (
-        <div className="flex items-center justify-end gap-1.5">
-          <Link href={`/superadmin/klien/${row.id}`}>
-            <Button variant="ghost" size="sm" title="Lihat detail">
-              Detail
-            </Button>
-          </Link>
-          <Link href="/superadmin/mou">
-            <Button variant="ghost" size="sm" title="Konfigurasi MOU">
-              MOU
-            </Button>
-          </Link>
-          <Button
-            variant={row.status === "AKTIF" ? "outline" : "primary"}
-            size="sm"
-            onClick={() => handleToggleStatus(row)}
-            className={row.status === "AKTIF" ? "text-[var(--danger)] hover:bg-[var(--danger)]/10" : ""}
-          >
-            {row.status === "AKTIF" ? "Suspend" : "Aktifkan"}
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Manajemen Perusahaan Klien"
-        description="Daftar seluruh perusahaan klien yang terdaftar dalam ekosistem HRIS Terhubung Gajiku."
-        breadcrumbs={[{ label: "Superadmin" }, { label: "Klien" }]}
-        action={
-          <Link href="/superadmin/klien/tambah">
-            <Button variant="primary" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
-              Tambah Klien Baru
-            </Button>
-          </Link>
-        }
-      />
-
-      {/* Toolbar Pencarian */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="w-full sm:w-80">
-          <Input
-            placeholder="Cari nama perusahaan, kode, atau PIC..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            leftIcon={<Search className="w-4 h-4" />}
-          />
-        </div>
-      </div>
-
-      {/* Tabel Klien */}
-      <Table
-        columns={columns}
-        data={filteredClients}
-        keyExtractor={(row) => row.id}
-        emptyTitle="Klien Tidak Ditemukan"
-        emptyDescription="Tidak ada data perusahaan klien yang cocok dengan kata kunci pencarian Anda."
-      />
-
-      {/* Modal Konfirmasi Suspend */}
-      <ConfirmDialog
-        isOpen={!!clientToSuspend}
-        onClose={() => setClientToSuspend(null)}
-        onConfirm={confirmSuspend}
-        title={`Suspend Perusahaan ${clientToSuspend?.name}?`}
-        message="Menangguhkan perusahaan ini akan membatasi admin dan seluruh pegawai klien tersebut untuk melakukan login atau transaksi baru."
-        confirmText="Ya, Suspend Klien"
-      />
-    </div>
-  );
+import { useEffect,useState } from "react";
+type Client={id:string;code:string;name:string;status:"AKTIF"|"SUSPEND"|"NONAKTIF";_count:{employees:number;projects:number};bundleSubscription:{mode:string}|null};
+export default function SuperadminClients(){
+  const [clients,setClients]=useState<Client[]>([]);const [name,setName]=useState("");const [code,setCode]=useState("");
+  const [error,setError]=useState("");const [busy,setBusy]=useState(false);
+  async function load(){
+    const response=await fetch("/api/superadmin/clients",{cache:"no-store"});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||"Gagal memuat klien");
+    setClients(data.clients);
+  }
+  useEffect(()=>{void load().catch(e=>setError(e instanceof Error?e.message:"Gagal memuat"));},[]);
+  async function create(e:React.FormEvent){
+    e.preventDefault();setBusy(true);setError("");
+    try{
+      const res=await fetch("/api/superadmin/clients",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code,name})});
+      const data=await res.json();if(!res.ok)throw new Error(data.error||"Gagal membuat klien");
+      setName("");setCode("");await load();
+    }catch(e){setError(e instanceof Error?e.message:"Gagal");}finally{setBusy(false);}
+  }
+  async function change(client:Client,status:Client["status"]){
+    if(!confirm("Ubah status tenant "+client.name+" menjadi "+status+"?"))return;
+    setBusy(true);setError("");
+    try{
+      const res=await fetch("/api/superadmin/clients/"+encodeURIComponent(client.id),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})});
+      const d=await res.json();if(!res.ok)throw new Error(d.error||"Gagal mengubah");
+      await load();
+    }catch(e){setError(e instanceof Error?e.message:"Gagal");}finally{setBusy(false);}
+  }
+  return <main className="space-y-5 p-5">
+    <h1 className="text-2xl font-bold">Klien Elrise</h1>
+    <p className="text-sm opacity-70">Sumber data: MySQL. Tenant baru dibuat dengan semua modul dinonaktifkan sampai konfigurasi selesai. Mode awal ELRISE_ONLY.</p>
+    {error&&<p role="alert" className="text-red-600">{error}</p>}
+    <form onSubmit={create} className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
+      <label className="text-sm">Kode PT<input required minLength={2} maxLength={40} value={code} onChange={e=>setCode(e.target.value.toUpperCase())} className="mt-1 block rounded border p-2"/></label>
+      <label className="text-sm">Nama PT<input required minLength={2} maxLength={180} value={name} onChange={e=>setName(e.target.value)} className="mt-1 block rounded border p-2"/></label>
+      <button disabled={busy} className="rounded bg-teal-700 px-4 py-2 text-white disabled:opacity-50">Daftarkan PT</button>
+    </form>
+    <div className="overflow-auto rounded-xl border"><table className="w-full text-sm"><thead><tr className="border-b"><th className="p-3 text-left">PT</th><th className="p-3">Project</th><th className="p-3">Pegawai</th><th className="p-3">Paket</th><th className="p-3">Status</th><th className="p-3">Aksi</th></tr></thead>
+      <tbody>{clients.map(c=><tr key={c.id} className="border-b"><td className="p-3">{c.name}<div className="text-xs opacity-60">{c.code}</div></td>
+        <td className="p-3 text-center">{c._count.projects}</td><td className="p-3 text-center">{c._count.employees}</td>
+        <td className="p-3 text-center">{c.bundleSubscription?.mode||"—"}</td><td className="p-3 text-center">{c.status}</td>
+        <td className="p-3 text-center">{c.status==="AKTIF"?
+          <button disabled={busy} className="rounded border px-3 py-1" onClick={()=>void change(c,"SUSPEND")}>Suspend</button>:
+          <button disabled={busy} className="rounded border px-3 py-1" onClick={()=>void change(c,"AKTIF")}>Aktifkan</button>}</td>
+      </tr>)}</tbody></table></div>
+  </main>;
 }
