@@ -58,6 +58,7 @@ jobs:
           --health-retries=15
     env:
       DATABASE_URL: mysql://elrise_ci:ci_password_only@127.0.0.1:3306/elrise_ci
+      AUTH_SECRET: ci-only-placeholder-secret-at-least-32-bytes-long
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
