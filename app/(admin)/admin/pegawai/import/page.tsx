@@ -25,10 +25,21 @@ export default function ImportPegawaiPage() {
   async function selectFile(file?: File) {
     if (!file) return;
     setPreview(null); setConfirm(false); setCompleted(false); setMessage("");
-    if (file.size > 1024 * 1024 || !file.name.toLowerCase().endsWith(".csv")) {
-      setMessage("Pilih file .csv maksimal 1 MB"); return;
+    if (file.size > 1024 * 1024) {setMessage("Maksimal 1 MB");return;}
+    if (file.name.toLowerCase().endsWith(".csv")) {setCsv(await file.text());return;}
+    if (file.name.toLowerCase().endsWith(".xlsx")) {
+      setLoading(true);
+      try {
+        const form = new FormData();form.append("file",file);
+        const res = await fetch("/api/admin/employee-import/convert",{method:"POST",body:form});
+        const data=await res.json();
+        if(!res.ok)throw new Error(data.error||"Konversi Excel gagal");
+        setCsv(data.csv);setMessage("Excel dikonversi. Selanjutnya klik Periksa CSV untuk validasi database.");
+      }catch(e){setCsv("");setMessage(e instanceof Error?e.message:"Konversi gagal");}
+      finally{setLoading(false);}
+      return;
     }
-    setCsv(await file.text());
+    setMessage("Pilih file CSV atau XLSX maksimal 1 MB");
   }
   async function doPreview() {
     setLoading(true); setMessage(""); setConfirm(false);
@@ -61,11 +72,11 @@ export default function ImportPegawaiPage() {
   }
   return <main className="mx-auto max-w-5xl space-y-6 p-6">
     <Link href="/admin/pegawai" className="text-sm underline">← Kembali ke Karyawan</Link>
-    <h1 className="text-2xl font-semibold">Import Karyawan (CSV)</h1>
+    <h1 className="text-2xl font-semibold">Import Karyawan (CSV/Excel)</h1>
     <p className="text-sm opacity-75">Preview terlebih dahulu. Proses ini hanya menyimpan data karyawan, bukan membuat akun atau mengaktifkan plafon Gajiku.</p>
     <section className="space-y-3 rounded-xl border p-5">
-      <p className="text-sm">Kolom wajib: <code>employee_code,name,email,project_id,base_salary_idr</code>. Gunakan ID proyek yang terdaftar di Elrise.</p>
-      <input aria-label="Pilih file CSV" type="file" accept=".csv,text/csv" onChange={e => void selectFile(e.target.files?.[0])} />
+      <p className="text-sm">Kolom wajib pada CSV atau baris pertama Excel: <code>employee_code,name,email,project_id,base_salary_idr</code>. Gunakan ID proyek yang terdaftar di Elrise.</p>
+      <input aria-label="Pilih file CSV" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={e => void selectFile(e.target.files?.[0])} />
       <div><button type="button" disabled={!csv || loading || completed} onClick={() => void doPreview()} className="rounded-lg bg-slate-800 px-4 py-2 text-white disabled:opacity-50">Periksa CSV</button></div>
       {preview && <div className="space-y-3">
         <p>{preview.valid}/{preview.total} valid</p>
