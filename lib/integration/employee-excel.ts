@@ -1,4 +1,3 @@
-import "server-only";
 import ExcelJS from "exceljs";
 
 const HEADERS = ["employee_code","name","email","project_id","base_salary_idr"];
@@ -18,7 +17,7 @@ function csvCell(value: string): string {
 export async function excelEmployeeToCsv(bytes: Buffer): Promise<string> {
   if (bytes.length < 30 || bytes.length > 1024 * 1024) throw new Error("XLSX melebihi 1 MB atau kosong");
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(bytes as Parameters<typeof workbook.xlsx.load>[0]);
+  await workbook.xlsx.load(bytes as unknown as Parameters<typeof workbook.xlsx.load>[0]);
   const sheet = workbook.worksheets[0];
   if (!sheet) throw new Error("Spreadsheet kosong");
   if (sheet.actualRowCount < 2 || sheet.actualRowCount > MAX_ROWS + 1)
