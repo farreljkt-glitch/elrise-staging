@@ -64,7 +64,7 @@ export async function POST(request: Request) {
         tx.user.findFirst({ where: { email: input.email }, select: { id: true } }),
       ]);
       if (conflicts.some(Boolean)) throw new Error("Employee conflict");
-      return tx.pegawai.create({
+      const created = await tx.pegawai.create({
         data: {
           clientId: actor.clientId!, projectId: project.id,
           idPegawai: input.employeeCode, nama: input.name,
@@ -72,6 +72,11 @@ export async function POST(request: Request) {
         },
         select: { id: true, idPegawai: true, nama: true, email: true },
       });
+      await tx.auditLog.create({ data: {
+        clientId: actor.clientId!, actorId: actor.id, action: "CREATE", entity: "Pegawai", entityId: created.id,
+        newValue: { employeeCode: created.idPegawai, projectId: project.id },
+      } });
+      return created;
     });
     return NextResponse.json({ employee: result, accountStatus: "NOT_PROVISIONED" }, { status: 201 });
   } catch (error) {
