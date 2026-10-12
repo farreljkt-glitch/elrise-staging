@@ -10,7 +10,7 @@ const secret = () => {
   if (!value || Buffer.byteLength(value) < 32) throw new Error("AUTH_SECRET wajib diisi dengan minimal 32 byte acak.");
   return new TextEncoder().encode(value);
 };
-export type SessionUser = { id:string; email:string; name:string; role:Role; clientId:string|null; pegawaiId:string|null; mustChangePassword:boolean };
+export type SessionUser = { id:string; email:string; name:string; role:Role; clientId:string|null; pegawaiId:string|null; managedProjectId?:string|null; mustChangePassword:boolean };
 export async function createSession(user: SessionUser) {
   const currentUser = await db.user.findUnique({
   where: { id: user.id },
@@ -40,7 +40,7 @@ export async function getSession(): Promise<SessionUser|null> {
     const user=await db.user.findUnique({where:{id:payload.sub},include:{client:true}});
     if (!user || !user.isActive || (user.client && user.client.status !== "AKTIF")) return null;
     if (typeof payload.tokenVersion !== "number" || payload.tokenVersion !== user.tokenVersion) return null;
-    return {id:user.id,email:user.email,name:user.name,role:user.role,clientId:user.clientId,pegawaiId:user.pegawaiId,mustChangePassword:user.mustChangePassword};
+    return {id:user.id,email:user.email,name:user.name,role:user.role,clientId:user.clientId,pegawaiId:user.pegawaiId,managedProjectId:user.managedProjectId,mustChangePassword:user.mustChangePassword};
   } catch { return null; }
 }
 export async function requireUser(roles?: Role[]) {

@@ -1,7 +1,7 @@
 // Definisikan seluruh tipe data TypeScript untuk aplikasi HRIS "Terhubung Gajiku"
 // Menggunakan pendekatan strict typing untuk menjaga integritas data.
 
-export type UserRole = "SUPERADMIN" | "ADMIN" | "PEGAWAI";
+export type UserRole = "SUPERADMIN" | "ADMIN" | "ADMIN_PROJECT" | "PEGAWAI";
 
 export interface User {
   id: string;

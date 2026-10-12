@@ -15,6 +15,10 @@ export function canAccessModule(role: UserRole | undefined, modulePath: string):
     return role === "ADMIN";
   }
 
+  if (modulePath.startsWith("/project")) {
+    return role === "ADMIN_PROJECT";
+  }
+
   // PEGAWAI punya akses ke modul /pegawai
   if (modulePath.startsWith("/pegawai")) {
     return role === "PEGAWAI";
@@ -29,6 +33,8 @@ export function getRoleDashboardPath(role: UserRole): string {
       return "/superadmin/dashboard";
     case "ADMIN":
       return "/admin/dashboard";
+    case "ADMIN_PROJECT":
+      return "/project/dashboard";
     case "PEGAWAI":
       return "/pegawai/dashboard";
     default:

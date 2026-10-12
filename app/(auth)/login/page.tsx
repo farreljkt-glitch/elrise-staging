@@ -51,6 +51,7 @@ export default function LoginPage() {
         const role = sessionData?.user?.role;
         if (role === "SUPERADMIN") router.push("/superadmin/dashboard");
         else if (role === "ADMIN") router.push("/admin/dashboard");
+        else if (role === "ADMIN_PROJECT") router.push("/project/dashboard");
         else if (role === "PEGAWAI") router.push("/pegawai/dashboard");
         else router.push("/login");
       } else {
