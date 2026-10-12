@@ -37,3 +37,38 @@ jobs:
         run: npm test
       - name: Production build
         run: npm run build
+
+  mysql-schema-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci_root_only
+          MYSQL_DATABASE: elrise_ci
+          MYSQL_USER: elrise_ci
+          MYSQL_PASSWORD: ci_password_only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci_root_only"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+    env:
+      DATABASE_URL: mysql://elrise_ci:ci_password_only@127.0.0.1:3306/elrise_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npx prisma validate
+      - run: npx prisma generate
+      - name: Apply schema to disposable MySQL
+        run: npx prisma db push
+      - name: Assert critical tables and unique constraints
+        run: node integration/scripts/q6-schema-smoke.cjs
