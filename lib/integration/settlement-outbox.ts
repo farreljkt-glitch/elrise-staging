@@ -15,9 +15,15 @@ export type PaidKasbonEvent = {
 export async function enqueuePaidKasbonSettlement(
   tx: Prisma.TransactionClient, event: PaidKasbonEvent
 ) {
-  if (!event.paymentProofReference || !/^\d+$/.test(event.amount) || BigInt(event.amount) <= 0n) {
+  if (!event.paymentProofReference?.trim() || !/^\d+$/.test(event.amount) || BigInt(event.amount) <= 0n) {
     throw new Error("Invalid payment proof or settlement amount");
   }
+  const requiredIds = [event.eventId, event.clientId, event.externalTenantId,
+    event.externalEmployeeId, event.gajikuTxId, event.payrollItemId];
+  if (requiredIds.some(value => !value?.trim()))
+    throw new Error("Missing settlement identity");
+  if (!Number.isFinite(Date.parse(event.paidAt)))
+    throw new Error("Invalid paidAt timestamp");
   const payload = JSON.stringify(event);
   const payloadHash = createHash("sha256").update(payload).digest("hex");
   return tx.integrationSettlementOutbox.create({
