@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   SUPERADMIN
   ADMIN
+  ADMIN_PROJECT
   PEGAWAI
 }
 
@@ -125,6 +126,7 @@ model Project {
   employees       Pegawai[]
   officeLocations OfficeLocation[]
   attendances     Attendance[]
+  projectManagers User[] @relation("ProjectManagers")
 
   @@unique([clientId, code])
   @@unique([clientId, name])
@@ -171,6 +173,7 @@ model User {
   role               Role
   clientId           String?
   pegawaiId          String?    @unique
+  managedProjectId   String?
   isActive           Boolean    @default(true)
   mustChangePassword Boolean    @default(true)
   tokenVersion       Int        @default(0)
@@ -181,9 +184,11 @@ model User {
   updatedAt          DateTime   @updatedAt
   client             Client?    @relation(fields: [clientId], references: [id], onDelete: Restrict)
   pegawai            Pegawai?   @relation(fields: [pegawaiId], references: [id], onDelete: SetNull)
+  managedProject     Project?   @relation("ProjectManagers", fields: [managedProjectId], references: [id], onDelete: SetNull)
   auditLogs          AuditLog[]
 
   @@index([clientId, role, isActive])
+  @@index([clientId, managedProjectId])
 }
 
 model Pegawai {
