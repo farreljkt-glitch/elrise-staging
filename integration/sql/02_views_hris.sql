@@ -1,4 +1,4 @@
--- Jalankan sebagai DBA setelah schema HRIS diterapkan dan setelah membuat definer khusus.
+-- DEPRECATED/UNVERIFIED LEGACY SQL. DO NOT EXECUTE ON GAJIKU LIVE OR ELRISE PRODUCTION.\n-- View security/tenant mapping and finance loan limit logic do not match the approved contract.\n-- Jalankan sebagai DBA setelah schema HRIS diterapkan dan setelah membuat definer khusus.
 -- Definer (mis. hris_view_reader@localhost) hanya perlu SELECT pada kolom sumber Gajiku
 -- yang dipakai view ini, bukan hak tulis. Jangan gunakan root sebagai definer.
 USE hris_db;

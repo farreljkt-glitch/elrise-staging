@@ -1,6 +1,6 @@
 # Terhubung Gajiku — HRIS Elkyno
 
-Aplikasi HRIS multi-klien Next.js App Router + TypeScript + Prisma/MySQL. UI awal tetap dipertahankan; fondasi autentikasi server, skema database, integrasi view, audit dan fungsi perhitungan telah ditambahkan. **Jangan langsung memakai data gaji asli sebelum menjalankan seluruh checklist release di bawah.** Integrasi Gajiku memerlukan verifikasi skema legacy aktual.
+Aplikasi HRIS multi-klien Next.js App Router + TypeScript + Prisma/MySQL. UI awal tetap dipertahankan; fondasi autentikasi server, skema database, kontrak API Gajiku yang belum diverifikasi, audit dan fungsi perhitungan telah ditambahkan. **Jangan langsung memakai data gaji asli sebelum menjalankan seluruh checklist release di bawah.** Integrasi Gajiku memerlukan verifikasi skema legacy aktual.
 
 ## Status yang jujur
 
@@ -20,33 +20,22 @@ Aplikasi HRIS multi-klien Next.js App Router + TypeScript + Prisma/MySQL. UI awa
 ## Setup lokal
 
 1. Salin `.env.example` menjadi `.env` dan isi `DATABASE_URL`, `AUTH_SECRET` (minimal 32 byte acak), `UPLOAD_DIR`, serta kredensial seed. Jangan commit `.env`.
-2. Periksa dan edit `integration/sql/01_users_grants.sql` dengan password kuat dan akun Gajiku aktual; jalankan sebagai DBA/root. Jangan menjalankan placeholder apa adanya.
+2. **DILARANG menjalankan** SQL legacy `integration/sql/01_users_grants.sql` atau `02_views_hris.sql` ke database live; keduanya belum diverifikasi. Baca `integration/PHASE_Q7_CONTRACT_AUDIT.md`.
 3. Install dependency dengan satu package manager yang konsisten, misalnya `npm install`.
 4. Jalankan `npx prisma generate`, lalu terapkan schema di development dengan `npx prisma db push`. Untuk production, gunakan migration yang direview dan diuji; jangan memakai `db push` sebagai prosedur deployment tanpa backup/review.
-5. Setelah tabel HRIS dibuat, jalankan `integration/sql/02_views_hris.sql` sebagai DBA dan verifikasi semua grants/definer. Jangan memberi akses langsung ke tabel Gajiku kepada `hris_app`.
+5. Verifikasi tabel di staging Elrise terisolasi. Integrasi kasbon Gajiku tetap **disabled** sampai endpoint Gajiku staging, mapping tenant, dan grant/API auth lulus tes.
 6. Seed superadmin: `npm run db:seed`. Password seed minimal 16 karakter. Hapus variabel password seed setelahnya. Login pertama akan diarahkan ke `/ganti-password`; kata sandi baru minimal 12 karakter. Pastikan skema terbaru sudah diterapkan agar tabel `LoginThrottle` tersedia.
 7. Jalankan `npm run dev`.
 8. Tes: `npm run typecheck`, `npm test`, `npm run lint`, `npm run build`.
 
-## Integrasi dua database
+## Integrasi dua database — gate wajib sebelum aktivasi
 
-Arsitektur yang dimaksud:
-
-- HRIS menulis hanya ke `hris_db`.
-- Gajiku menulis hanya ke `gajiku_db`.
-- HRIS membaca kasbon melalui `hris_db.v_gajiku_kasbon` saja; tidak melakukan query Prisma langsung ke tabel Gajiku.
-- Gajiku dapat membaca `hris_db.v_kehadiran` dengan akun read-only.
-
-Urutan SQL:
-
-1. Verifikasi struktur database Gajiku dengan `SHOW CREATE TABLE transactions;`, `SHOW CREATE TABLE users;`, dan `SHOW CREATE TABLE pegawai;`.
-2. Sesuaikan host akun Gajiku dan password placeholder pada `integration/sql/01_users_grants.sql`, lalu jalankan sebagai DBA. `hris_view_reader` hanya diberi SELECT kolom sumber yang diperlukan.
-3. Terapkan schema HRIS di staging.
-4. Jalankan `integration/sql/02_views_hris.sql` setelah tabel HRIS tersedia; skrip ini membuat view dengan definer khusus dan memberi grant view ke akun Gajiku. Sesuaikan host akun Gajiku bila bukan `localhost`.
-5. Jalankan `integration/sql/03_verify_views.sql` dan cek hasil mapping ID pegawai serta jumlah transaksi secara manual.
-6. Uji kondisi Gajiku mati/grant dicabut: payroll harus gagal jelas, bukan menganggap kasbon nol.
-
-View kasbon memakai `t.periode`, `t.nominal`, `t.admin_fee`, `t.final_approved_at`, dan `p.id_pegawai` sesuai kontrak yang diberikan. Jangan memberi `GRANT ALL` ke `gajiku_db`.
+- Elrise menulis hanya ke database Elrise (konfigurasi aktual `DATABASE_URL` harus diverifikasi); Gajiku Live adalah sumber data transaksi kasbon.
+- Jalur integrasi yang sedang dikembangkan adalah **API internal tenant-scoped**. Kontrak sintetisnya di `integration/GAJIKU_API_CONTRACT_V1.md`. Endpoint Gajiku Live sebenarnya **belum diverifikasi**.
+- File `integration/sql/01_users_grants.sql`, `02_views_hris.sql`, dan `03_verify_views.sql` adalah rancangan **legacy**; tidak boleh dipakai tanpa audit schema/privilege oleh DBA pada staging clone.
+- Jangan membagikan gaji/rekening mentah kepada Gajiku. Hanya plafon yang terotorisasi, kehadiran tervalidasi, dan status transaksi yang benar-benar diperlukan.
+- Jika koneksi Gajiku gagal, mapping tenant tidak cocok, cutover belum ditentukan, atau transaksi tidak final-success, payroll bundle wajib **fail closed** (bukan menganggap kasbon nol).
+- Gajiku Live **tidak diubah** oleh workflow pengembangan ini. Deploy baru perlu kontrak yang disetujui kedua tim, approval finance, backup, dan rencana rollback.
 
 ## Periode payroll
 
