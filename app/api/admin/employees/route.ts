@@ -36,3 +36,53 @@ export async function GET() {
     return NextResponse.json({ error: "Gagal memuat karyawan" }, { status: 500 });
   }
 }
+
+
+export async function POST(request: Request) {
+  const actor = await getSession();
+  if (!actor || actor.role !== "ADMIN" || !actor.clientId || actor.mustChangePassword)
+    return NextResponse.json({ error: "Tidak diizinkan" }, { status: 403 });
+  try {
+    const { parseEmployeeCreate } = await import("@/lib/employees/create-validation");
+    const payload = await request.json();
+    const input = parseEmployeeCreate(payload);
+    const result = await db.$transaction(async tx => {
+      const client = await tx.client.findUnique({
+        where: { id: actor.clientId! }, select: { status: true },
+      });
+      if (client?.status !== "AKTIF") throw new Error("Inactive tenant");
+      const project = await tx.project.findFirst({
+        where: { id: input.projectId, clientId: actor.clientId!, isActive: true },
+        select: { id: true },
+      });
+      if (!project) throw new Error("Project unavailable");
+      const conflicts = await Promise.all([
+        tx.pegawai.findFirst({ where: { OR: [
+          { idPegawai: input.employeeCode },
+          { clientId: actor.clientId!, email: input.email },
+        ] }, select: { id: true } }),
+        tx.user.findFirst({ where: { email: input.email }, select: { id: true } }),
+      ]);
+      if (conflicts.some(Boolean)) throw new Error("Employee conflict");
+      return tx.pegawai.create({
+        data: {
+          clientId: actor.clientId!, projectId: project.id,
+          idPegawai: input.employeeCode, nama: input.name,
+          email: input.email, gajiPokok: BigInt(input.baseSalaryIdr),
+        },
+        select: { id: true, idPegawai: true, nama: true, email: true },
+      });
+    });
+    return NextResponse.json({ employee: result, accountStatus: "NOT_PROVISIONED" }, { status: 201 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Invalid request";
+    if (/conflict|Unique constraint|P2002/i.test(message))
+      return NextResponse.json({ error: "Data pegawai sudah digunakan" }, { status: 409 });
+    if (/tenant|Project unavailable/.test(message))
+      return NextResponse.json({ error: "Tenant atau project tidak tersedia" }, { status: 403 });
+    if (/Invalid|Unexpected token|JSON/.test(message))
+      return NextResponse.json({ error: "Data pegawai tidak valid" }, { status: 400 });
+    console.error("Employee creation failed", error instanceof Error ? error.name : "unknown");
+    return NextResponse.json({ error: "Gagal menambahkan pegawai" }, { status: 500 });
+  }
+}
