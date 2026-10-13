@@ -64,6 +64,8 @@ export async function POST(req:Request) {
       AttendanceStatus.CUTI,
       AttendanceStatus.IZIN,
       AttendanceStatus.LIBUR,
+      AttendanceStatus.DINAS,
+      AttendanceStatus.ALPHA,
     ];
 
     if (
@@ -139,9 +141,11 @@ export async function POST(req:Request) {
     return true;
   }
     if (needsIp && !ipValid) return NextResponse.json({message:"IP jaringan ini tidak terdaftar sebagai jaringan kantor."},{status:403});
+    let unverifiedIpFallback=false;
     if(rule===AttendanceNetworkRule.GPS_ATAU_IP){
       let gpsOk=false; try{gpsOk=await validateLocation();}catch{gpsOk=false;}
       if(!gpsOk&&!ipValid) return NextResponse.json({message:"Absensi ditolak: lokasi GPS dan IP kantor tidak memenuhi aturan."},{status:403});
+      unverifiedIpFallback=!gpsOk&&ipValid;
     } else if(needsGps) { try{await validateLocation();}catch(e){return NextResponse.json({message:e instanceof Error?e.message:"Validasi lokasi gagal."},{status:403});} }
     let selfiePath:string|null=null;
     if(setting.requireSelfie){
@@ -172,11 +176,38 @@ export async function POST(req:Request) {
     const status:AttendanceStatus=parsed.data.action==="CHECK_IN"&&lateMinutes>0?"TELAT":"HADIR";
     const result=await db.$transaction(async tx=>{
       if(parsed.data.action==="CHECK_IN") {
-        const data={clientId:client.id,projectId:employee.projectId,pegawaiId:employee.id,tanggal:today,checkInAt:now,status,selfiePath,lat:new Prisma.Decimal(parsed.data.lat),lng:new Prisma.Decimal(parsed.data.lng),accuracyM:new Prisma.Decimal(parsed.data.accuracyM),ip,suspiciousFlags:Prisma.JsonNull,validatedAt:now};
-        if(existing) return tx.attendance.update({where:{id:existing.id},data});
+        // A valid GPS/IP check does not constitute attendance approval:
+        // only an authorized, completed review can populate validatedAt.
+        const data={
+          clientId:client.id,projectId:employee.projectId,pegawaiId:employee.id,
+          tanggal:today,checkInAt:now,status,selfiePath,
+          lat:new Prisma.Decimal(parsed.data.lat),lng:new Prisma.Decimal(parsed.data.lng),
+          accuracyM:new Prisma.Decimal(parsed.data.accuracyM),ip,
+          suspiciousFlags:unverifiedIpFallback?["GPS_UNVERIFIED_IP_FALLBACK"]:Prisma.JsonNull,
+          validatedAt:null,
+        };
+        if(existing){
+          const changed=await tx.attendance.updateMany({
+            where:{id:existing.id,clientId:client.id,pegawaiId:employee.id,
+              checkInAt:null,status:{in:[AttendanceStatus.HADIR,AttendanceStatus.TELAT]}},
+            data,
+          });
+          if(changed.count!==1)throw new Error("Check-in conflict");
+          return tx.attendance.findUniqueOrThrow({where:{id:existing.id}});
+        }
         return tx.attendance.create({data});
       }
-      return tx.attendance.update({where:{id:existing!.id},data:{checkOutAt:now,...(selfiePath?{selfiePath}:{}),updatedAt:now}});
+      const changed=await tx.attendance.updateMany({
+        where:{id:existing!.id,clientId:client.id,pegawaiId:employee.id,
+          checkInAt:{not:null},checkOutAt:null},
+        data:{
+          checkOutAt:now,
+          ...(selfiePath?{selfiePath}:{}),
+          ...(unverifiedIpFallback?{suspiciousFlags:["GPS_UNVERIFIED_IP_FALLBACK"]}:{}),
+        },
+      });
+      if(changed.count!==1)throw new Error("Check-out conflict");
+      return tx.attendance.findUniqueOrThrow({where:{id:existing!.id}});
     });
     await writeAudit({actor:session,clientId:client.id,action:"CREATE",entity:"Attendance",entityId:result.id,newValue:{action:parsed.data.action,status,ip}}).catch(error=>console.error("Audit log absensi gagal:",error instanceof Error?error.message:"unknown"));
     selfiePathForCleanup=null;

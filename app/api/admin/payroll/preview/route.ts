@@ -33,6 +33,7 @@ export async function GET(request: Request) {
         clientId: actor.clientId, pegawaiId: { in: employees.map(e=>e.id) },
         tanggal: { gte: range.startDate, lte: range.endDate },
         status: { in: ["HADIR","TELAT"] }, validatedAt: { not: null },
+        checkInAt: { not: null }, checkOutAt: { not: null },
       },
       select: { pegawaiId: true },
     });
