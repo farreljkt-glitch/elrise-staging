@@ -66,7 +66,7 @@ export async function PATCH(request:Request,ctx:Context){
         if(changed.count!==1)throw new Error("INSUFFICIENT");
       }
       await tx.auditLog.create({data:{
-        clientId:actor.clientId!,actorId:actor.id,action:"APPROVE",
+        clientId:actor.clientId!,actorId:actor.id,action:decision.decision==="APPROVE"?"APPROVE":"REJECT",
         entity:"LeaveRequest",entityId:item.id,
         oldValue:{status:"MENUNGGU"},
         newValue:{status:decision.decision==="APPROVE"?"DISETUJUI":"DITOLAK",
