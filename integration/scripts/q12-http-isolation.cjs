@@ -127,6 +127,79 @@ async function main() {
   assert.ok(!JSON.stringify(projectTeam.body).includes("gajiPokok"));
   assert.ok(!JSON.stringify(projectTeam.body).includes("1000000"));
   console.log("PASS Admin Project boundary and salary redaction");
+
+  // Privileged role creation must require Superadmin and a same-tenant project.
+  const superEmail = "super-"+suffix+"@example.com";
+  await db.user.create({ data: {
+    email: superEmail, name: "Synthetic Superadmin", passwordHash,
+    role: "SUPERADMIN", mustChangePassword: false,
+  } });
+  const cookieSuper = await login(superEmail,password);
+  const unauthorizedAdminInvite = await request("/api/superadmin/admin-invitations", {
+    method: "POST",headers:{cookie:cookieA,"content-type":"application/json"},
+    body:JSON.stringify({clientId:clientA.id,role:"ADMIN_PROJECT",projectId:projectA.id,
+      name:"Should be denied",email:"denied-"+suffix+"@example.com"}),
+  });
+  assert.equal(unauthorizedAdminInvite.response.status,403);
+
+  const foreignAdminInvite = await request("/api/superadmin/admin-invitations",{
+    method:"POST",headers:{cookie:cookieSuper,"content-type":"application/json"},
+    body:JSON.stringify({clientId:clientA.id,role:"ADMIN_PROJECT",projectId:projectB.id,
+      name:"Foreign Manager",email:"foreign-"+suffix+"@example.com"}),
+  });
+  assert.equal(foreignAdminInvite.response.status,403,
+    "Superadmin must not assign a cross-tenant project");
+
+  const adminProjectEmail="manager-"+suffix+"@example.com";
+  const adminInvite = await request("/api/superadmin/admin-invitations",{
+    method:"POST",headers:{cookie:cookieSuper,"content-type":"application/json"},
+    body:JSON.stringify({clientId:clientA.id,role:"ADMIN_PROJECT",projectId:projectA.id,
+      name:"Assigned Manager",email:adminProjectEmail}),
+  });
+  assert.equal(adminInvite.response.status,201,JSON.stringify(adminInvite.body));
+  assert.ok(adminInvite.body.token && adminInvite.body.token.length>=40);
+  const inactiveManager=await db.user.findUnique({where:{email:adminProjectEmail}});
+  assert.equal(inactiveManager.isActive,false);
+  assert.equal(inactiveManager.clientId,clientA.id);
+  assert.equal(inactiveManager.managedProjectId,projectA.id);
+
+  const managerPassword="manager-password-"+suffix;
+  const adminActivate=await request("/api/auth/admin-invitation",{
+    method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({token:adminInvite.body.token,password:managerPassword}),
+  });
+  assert.equal(adminActivate.response.status,200,JSON.stringify(adminActivate.body));
+  const adminReplay=await request("/api/auth/admin-invitation",{
+    method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({token:adminInvite.body.token,password:managerPassword}),
+  });
+  assert.equal(adminReplay.response.status,400);
+  const cookieManager=await login(adminProjectEmail,managerPassword);
+  const managerScope=await request("/api/project/team",withCookie(cookieManager));
+  assert.equal(managerScope.response.status,200,JSON.stringify(managerScope.body));
+  assert.ok(managerScope.body.employees.some(e=>e.id===employeeA.id));
+  assert.ok(!managerScope.body.employees.some(e=>e.id===employeeB.id));
+  assert.equal((await request("/api/admin/employees",withCookie(cookieManager))).response.status,403);
+
+  const adminPTEmail="tenant-admin-"+suffix+"@example.com";
+  const ptInvite=await request("/api/superadmin/admin-invitations",{
+    method:"POST",headers:{cookie:cookieSuper,"content-type":"application/json"},
+    body:JSON.stringify({clientId:clientB.id,role:"ADMIN",projectId:null,
+      name:"Admin PT B",email:adminPTEmail}),
+  });
+  assert.equal(ptInvite.response.status,201,JSON.stringify(ptInvite.body));
+  const ptActivate=await request("/api/auth/admin-invitation",{
+    method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({token:ptInvite.body.token,password:"tenant-admin-"+suffix}),
+  });
+  assert.equal(ptActivate.response.status,200,JSON.stringify(ptActivate.body));
+  const cookieAdminPT=await login(adminPTEmail,"tenant-admin-"+suffix);
+  const ptList=await request("/api/admin/employees",withCookie(cookieAdminPT));
+  assert.equal(ptList.response.status,200);
+  assert.ok(ptList.body.employees.some(e=>e.id===employeeB.id));
+  assert.ok(!ptList.body.employees.some(e=>e.id===employeeA.id));
+  console.log("PASS S3 Superadmin privileged invitations and role-scoped activation");
+
   console.log("PASS Q12 real HTTP tenant and project isolation");
 }
 main().catch(err => {
