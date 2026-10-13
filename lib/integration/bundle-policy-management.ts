@@ -27,7 +27,7 @@ export async function createEffectiveDatedLoanPolicies(input: PolicyRequest) {
     if (client?.status !== "AKTIF") throw new Error("Tenant inactive");
     const subscription = await tx.bundleSubscription.findUnique({ where: { clientId: actor.clientId! } });
     const connection = await tx.integrationConnection.findUnique({ where: { clientId: actor.clientId! } });
-    if (subscription?.mode !== "BUNDLE" || subscription.effectiveAt > effectiveAt || connection?.state !== "ACTIVE" || !connection.verifiedAt || connection.payrollOwner !== "ELRISE") throw new Error("Verified bundle required");
+    if (subscription?.mode !== "BUNDLE" || subscription.effectiveAt.toISOString().slice(0,10) > effectiveAt.toISOString().slice(0,10) || connection?.state !== "ACTIVE" || !connection.verifiedAt || connection.payrollOwner !== "ELRISE") throw new Error("Verified bundle required");
     if (input.pegawaiIds.length) {
       const employees = await tx.pegawai.findMany({ where: { clientId: actor.clientId!, id: { in: input.pegawaiIds }, isActive: true }, select: { id: true } });
       if (employees.length !== input.pegawaiIds.length) throw new Error("Employee not found in tenant");
