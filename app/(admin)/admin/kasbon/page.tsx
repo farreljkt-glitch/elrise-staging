@@ -1,5 +1,6 @@
 "use client";
 import { useEffect,useState } from "react";
+import Link from "next/link";
 import { LoanAccrualReadiness } from "@/components/integration/LoanAccrualReadiness";
 type Employee={id:string;code:string;name:string};
 type Policy={id:string;pegawaiId:string|null;mode:string;percentBps:number|null;
@@ -57,6 +58,7 @@ export default function AdminKasbonPolicyPage(){
   const money=(v:string)=>"Rp "+BigInt(v).toLocaleString("id-ID");
   return <main className="space-y-5 p-5">
     <h1 className="text-2xl font-bold">Kebijakan Plafon Kasbon — Elrise</h1>
+    <Link href="/admin/kasbon/pengajuan" className="inline-block rounded border px-4 py-2 text-sm">Review Pengajuan Kasbon →</Link>
     <p className="rounded-lg border border-amber-600 p-3 text-sm">
       Hanya konfigurasi kebijakan. <b>Belum ada kasbon atau sinkronisasi ke Gajiku.</b>
       THP sebelum potongan kasbon, outstanding, reservation, dan saldo final belum dihitung oleh halaman ini.

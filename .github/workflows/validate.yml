@@ -93,6 +93,8 @@ jobs:
         run: node integration/scripts/q12-http-isolation.cjs
       - name: Exercise Elrise policy APIs against disposable MySQL
         run: node integration/scripts/sprint2-loan-policy-http.cjs
+      - name: Test employee kasbon intake and Admin PT HOLD/reject against disposable MySQL
+        run: node integration/scripts/sprint2-kasbon-review-http.cjs
       - name: Stop test server
         if: always()
         run: if test -f /tmp/elrise-q12-next.pid; then kill $(cat /tmp/elrise-q12-next.pid) || true; fi

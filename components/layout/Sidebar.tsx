@@ -54,12 +54,14 @@ export function Sidebar() {
           { label: "Absensi & Validasi", href: "/admin/absensi", icon: CalendarCheck },
           { label: "Cuti & Izin", href: "/admin/cuti", icon: CalendarDays },
           { label: "Payroll", href: "/admin/payroll", icon: DollarSign },
-          { label: "Rekonsiliasi Kasbon", href: "/admin/kasbon", icon: WalletCards },
+          { label: "Kebijakan Kasbon", href: "/admin/kasbon", icon: WalletCards },
+          { label: "Review Pengajuan Kasbon", href: "/admin/kasbon/pengajuan", icon: WalletCards },
         ];
       case "PEGAWAI":
         return [
           { label: "Beranda", href: "/pegawai/dashboard", icon: LayoutDashboard },
           { label: "Absen Mandiri", href: "/pegawai/absen", icon: Clock },
+          { label: "Pengajuan Kasbon", href: "/pegawai/kasbon", icon: WalletCards },
           { label: "Pengajuan Cuti", href: "/pegawai/cuti", icon: CalendarDays },
           { label: "Slip Gaji", href: "/pegawai/slip", icon: DollarSign },
           { label: "Profil Saya", href: "/pegawai/profil", icon: User },

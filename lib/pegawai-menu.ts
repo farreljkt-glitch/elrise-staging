@@ -7,6 +7,7 @@ import {
   FileText,
   Target,
   GraduationCap,
+  WalletCards,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,5 +28,5 @@ export const PEGAWAI_MENU: PegawaiMenuItem[] = [
   { label: "Profil Saya", href: "/pegawai/profil", icon: UserRound },
   { label: "Dokumen", href: "/pegawai/dokumen", icon: FileText, soon: true },
   { label: "Kinerja", href: "/pegawai/kinerja", icon: Target, soon: true },
-  { label: "Pelatihan", href: "/pegawai/pelatihan", icon: GraduationCap, soon: true },
+  { label: "Kasbon", href: "/pegawai/kasbon", icon: WalletCards },
 ];
