@@ -198,6 +198,43 @@ async function main() {
   assert.equal(ptList.response.status,200);
   assert.ok(ptList.body.employees.some(e=>e.id===employeeB.id));
   assert.ok(!ptList.body.employees.some(e=>e.id===employeeA.id));
+  // Validated presence must be scoped to the acting PT/project and block suspicious cases.
+  const attendanceDate=new Date("2026-10-11T00:00:00.000Z");
+  const checkInAt=new Date("2026-10-11T01:00:00.000Z");
+  const checkOutAt=new Date("2026-10-11T09:00:00.000Z");
+  const attendanceA=await db.attendance.create({data:{
+    clientId:clientA.id,projectId:projectA.id,pegawaiId:employeeA.id,
+    tanggal:attendanceDate,status:"HADIR",checkInAt,checkOutAt,
+  }});
+  const attendanceB=await db.attendance.create({data:{
+    clientId:clientB.id,projectId:projectB.id,pegawaiId:employeeB.id,
+    tanggal:attendanceDate,status:"HADIR",checkInAt,checkOutAt,
+  }});
+  const approveReq=(id,cookie)=>request("/api/attendance/review/"+id,{
+    method:"POST",headers:{cookie,"content-type":"application/json"},
+    body:JSON.stringify({decision:"APPROVE"}),
+  });
+  assert.equal((await approveReq(attendanceB.id,cookieProject)).response.status,404,
+    "Admin Project must not approve a foreign tenant/project attendance");
+  assert.equal((await approveReq(attendanceA.id,cookieB)).response.status,404,
+    "Admin PT must not approve attendance of another company");
+  assert.equal((await approveReq(attendanceA.id,cookieEmployee)).response.status,403,
+    "Employees cannot approve their own attendance");
+  const approved=await approveReq(attendanceA.id,cookieProject);
+  assert.equal(approved.response.status,200,JSON.stringify(approved.body));
+  assert.ok((await db.attendance.findUnique({where:{id:attendanceA.id}})).validatedAt);
+  assert.equal((await approveReq(attendanceA.id,cookieProject)).response.status,409,
+    "Replayed attendance approval must not cause double business effect");
+
+  const flagged=await db.attendance.create({data:{
+    clientId:clientA.id,projectId:projectA.id,pegawaiId:ownCreate.body.employee.id,
+    tanggal:attendanceDate,status:"TELAT",checkInAt,checkOutAt,
+    suspiciousFlags:["gps_mismatch"],
+  }});
+  assert.equal((await approveReq(flagged.id,cookieA)).response.status,422);
+  assert.equal((await db.attendance.findUnique({where:{id:flagged.id}})).validatedAt,null);
+  console.log("PASS T1 validated attendance approval RBAC, replay and anomaly rejection");
+
   // Emergency offboarding must invalidate even already-issued JWT cookies.
   const unauthorizedRevoke=await request("/api/superadmin/admin-accounts/"+inactiveManager.id,{
     method:"PATCH",headers:{cookie:cookieA,"content-type":"application/json"},
