@@ -128,6 +128,7 @@ model Project {
   attendances     Attendance[]
   projectManagers User[] @relation("ProjectManagers")
 
+  @@unique([clientId, id])
   @@unique([clientId, code])
   @@unique([clientId, name])
   @@index([clientId, isActive])
@@ -183,8 +184,8 @@ model User {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   client             Client?    @relation(fields: [clientId], references: [id], onDelete: Restrict)
-  pegawai            Pegawai?   @relation(fields: [pegawaiId], references: [id], onDelete: SetNull)
-  managedProject     Project?   @relation("ProjectManagers", fields: [managedProjectId], references: [id], onDelete: SetNull)
+  pegawai            Pegawai?   @relation(fields: [clientId, pegawaiId], references: [clientId, id], onDelete: Restrict)
+  managedProject     Project?   @relation("ProjectManagers", fields: [clientId, managedProjectId], references: [clientId, id], onDelete: Restrict)
   auditLogs          AuditLog[]
 
   @@index([clientId, role, isActive])
@@ -212,7 +213,7 @@ model Pegawai {
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   client                 Client                  @relation(fields: [clientId], references: [id], onDelete: Restrict)
-  project                Project                 @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  project                Project                 @relation(fields: [clientId, projectId], references: [clientId, id], onDelete: Restrict)
   user                   User?
   attendances            Attendance[]
   corrections            AttendanceCorrection[]
@@ -223,6 +224,8 @@ model Pegawai {
 
   @@unique([clientId, email])
   @@unique([clientId, idPegawai])
+  @@unique([clientId, id])
+  @@unique([clientId, projectId, id])
   @@index([clientId, projectId, isActive])
   @@index([clientId, nama])
 }
@@ -273,8 +276,8 @@ model Attendance {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   client          Client           @relation(fields: [clientId], references: [id], onDelete: Restrict)
-  project         Project          @relation(fields: [projectId], references: [id], onDelete: Restrict)
-  pegawai         Pegawai          @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+  project         Project          @relation(fields: [clientId, projectId], references: [clientId, id], onDelete: Restrict)
+  pegawai         Pegawai          @relation(fields: [clientId, projectId, pegawaiId], references: [clientId, projectId, id], onDelete: Restrict)
 
   @@unique([pegawaiId, tanggal])
   @@index([clientId, tanggal, status])
@@ -296,7 +299,7 @@ model AttendanceCorrection {
   reviewedAt        DateTime?
   reviewReason      String?           @db.Text
   createdAt         DateTime          @default(now())
-  pegawai           Pegawai           @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+  pegawai           Pegawai           @relation(fields: [clientId, pegawaiId], references: [clientId, id], onDelete: Restrict)
 
   @@index([clientId, status, requestedDate])
 }
@@ -311,8 +314,11 @@ model LeaveType {
   isActive    Boolean        @default(true)
   client      Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
   requests    LeaveRequest[]
+  balances    LeaveBalance[]
 
   @@unique([clientId, name])
+  @@unique([clientId, id])
+
 }
 
 model LeaveRequest {
@@ -330,8 +336,8 @@ model LeaveRequest {
   reviewReason   String?       @db.Text
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
-  pegawai        Pegawai       @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
-  leaveType      LeaveType     @relation(fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  pegawai        Pegawai       @relation(fields: [clientId, pegawaiId], references: [clientId, id], onDelete: Restrict)
+  leaveType      LeaveType     @relation(fields: [clientId, leaveTypeId], references: [clientId, id], onDelete: Restrict)
   client         Client        @relation(fields: [clientId], references: [id])
 
   @@index([clientId, status, startDate, endDate])
@@ -347,7 +353,8 @@ model LeaveBalance {
   quota       Int
   used        Int      @default(0)
   updatedAt   DateTime @updatedAt
-  pegawai     Pegawai  @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+  pegawai     Pegawai  @relation(fields: [clientId, pegawaiId], references: [clientId, id], onDelete: Restrict)
+  leaveType   LeaveType @relation(fields: [clientId, leaveTypeId], references: [clientId, id], onDelete: Restrict)
   client      Client   @relation(fields: [clientId], references: [id])
 
   @@unique([pegawaiId, leaveTypeId, year])
@@ -385,11 +392,13 @@ model PayrollPeriod {
   items       PayrollItem[]
 
   @@unique([clientId, periodCode, cycle])
+  @@unique([clientId, id])
   @@index([clientId, status, startDate])
 }
 
 model PayrollItem {
   id                 String             @id @default(cuid())
+  clientId           String
   payrollPeriodId    String
   pegawaiId          String
   gajiPokok          BigInt             @default(0)
@@ -407,22 +416,24 @@ model PayrollItem {
   alphaDays          Int                @default(0)
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
-  period             PayrollPeriod      @relation(fields: [payrollPeriodId], references: [id], onDelete: Cascade)
-  pegawai            Pegawai            @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+  period             PayrollPeriod      @relation(fields: [clientId, payrollPeriodId], references: [clientId, id], onDelete: Cascade)
+  pegawai            Pegawai            @relation(fields: [clientId, pegawaiId], references: [clientId, id], onDelete: Restrict)
   settlements        KasbonSettlement[]
 
   @@unique([payrollPeriodId, pegawaiId])
+  @@unique([clientId, id])
   @@index([pegawaiId, payrollPeriodId])
 }
 
 model KasbonSettlement {
   id            String      @id @default(cuid())
+  clientId      String
   gajikuTxId    String      @unique @db.VarChar(191)
   payrollItemId String
   nominal       BigInt
   adminFee      BigInt
   settledAt     DateTime    @default(now())
-  payrollItem   PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Restrict)
+  payrollItem   PayrollItem @relation(fields: [clientId, payrollItemId], references: [clientId, id], onDelete: Restrict)
 
   @@index([settledAt])
 }
@@ -481,18 +492,20 @@ model IntegrationConnection {
   employees        IntegrationEmployeeMap[]
 
   @@unique([externalTenantId])
+  @@unique([clientId, id])
 }
 
 model IntegrationEmployeeMap {
   id                 String                @id @default(cuid())
+  clientId           String
   connectionId       String
   pegawaiId          String                @unique
   externalEmployeeId String                @db.VarChar(191)
   verifiedAt         DateTime?
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
-  connection         IntegrationConnection @relation(fields: [connectionId], references: [id], onDelete: Restrict)
-  pegawai            Pegawai               @relation(fields: [pegawaiId], references: [id], onDelete: Restrict)
+  connection         IntegrationConnection @relation(fields: [clientId, connectionId], references: [clientId, id], onDelete: Restrict)
+  pegawai            Pegawai               @relation(fields: [clientId, pegawaiId], references: [clientId, id], onDelete: Restrict)
 
   @@unique([connectionId, externalEmployeeId])
 }
