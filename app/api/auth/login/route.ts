@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { createSession } from "@/lib/auth-server";
 import { writeAudit } from "@/lib/audit";
 import { THROTTLE_WINDOW_MS, throttleKeys } from "@/lib/auth/login-throttle";
+import { getVerifiedClientIp } from "@/lib/auth/verified-proxy-ip";
 const schema=z.object({email:z.string().email().max(191),password:z.string().min(1).max(200)});
 export const runtime="nodejs";
 const DUMMY_HASH = bcrypt.hashSync("dummy-password-not-used", 12);
@@ -36,8 +37,8 @@ export async function POST(req:Request) {
   if(!parsed.success) return NextResponse.json({message:"Email atau kata sandi tidak valid."},{status:400});
   const email=parsed.data.email.trim().toLowerCase();
   try {
-    // X-Real-IP hanya aman jika reverse proxy menghapus header kiriman client lalu mengisinya sendiri.
-    const ip = req.headers.get("x-real-ip")?.trim() || null;
+    // Unverified X-Real-IP must never influence login throttle buckets.
+    const ip = getVerifiedClientIp(req.headers);
     const keys = throttleKeys(email, ip);
     const blocked = await Promise.all(keys.map(k => isLoginBlocked(k.fingerprint)));
     if (blocked.some(Boolean)) {

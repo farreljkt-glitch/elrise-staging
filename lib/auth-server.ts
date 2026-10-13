@@ -3,6 +3,7 @@ import { cookies, headers } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { db } from "@/lib/db";
 import type { Role } from "@prisma/client";
+import { getVerifiedClientIp } from "@/lib/auth/verified-proxy-ip";
 
 const COOKIE = "tg_session";
 const secret = () => {
@@ -52,5 +53,5 @@ export async function requireUser(roles?: Role[]) {
 }
 export async function requestMetadata() {
   const h=await headers();
-  return { ip:h.get("x-real-ip") || null, userAgent:h.get("user-agent")?.slice(0,500) || null };
+  return { ip:getVerifiedClientIp(h), userAgent:h.get("user-agent")?.slice(0,500) || null };
 }

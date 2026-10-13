@@ -273,6 +273,49 @@ async function main() {
   assert.equal((await db.attendance.findUnique({where:{id:flagged.id}})).validatedAt,null);
   console.log("PASS T1 validated attendance approval RBAC, replay and anomaly rejection");
 
+
+  // A forged X-Real-IP may never authorize attendance at an office IP.
+  await db.officeIp.create({data:{clientId:clientA.id,ipAddress:"203.0.113.7",isActive:true}});
+  await db.clientSetting.update({where:{clientId:clientA.id},data:{attendanceNetworkRule:"IP"}});
+  await db.user.create({data:{
+    email:employeeA.email,name:"Employee A",clientId:clientA.id,pegawaiId:employeeA.id,
+    role:"PEGAWAI",passwordHash,mustChangePassword:false,isActive:true,
+  }});
+  const cookieAEmployee=await login(employeeA.email,password);
+  const presence=(secretValue)=>{
+    const f=new FormData();for(const [k,v] of Object.entries({
+      action:"CHECK_IN",lat:"-6.2",lng:"106.8",accuracyM:"10",
+    }))f.set(k,v);
+    return request("/api/absen",{method:"POST",headers:{
+      cookie:cookieAEmployee,"x-real-ip":"203.0.113.7",
+      ...(secretValue?{"x-elrise-proxy-secret":secretValue}:{}),
+    },body:f});
+  };
+  assert.equal((await presence(null)).response.status,403,"unverified forwarded IP must be rejected");
+  assert.equal((await presence("forged")).response.status,403,"incorrect proxy credential must be rejected");
+  const validOfficePresence=await presence(process.env.PROXY_TRUST_SECRET);
+  assert.equal(validOfficePresence.response.status,201,JSON.stringify(validOfficePresence.body));
+  assert.equal((await db.attendance.findUnique({where:{id:validOfficePresence.body.attendanceId}})).validatedAt,null);
+  console.log("PASS P0 forged office IP rejected and verified proxy accepted");
+
+  const secondProject=await db.project.create({data:{
+    clientId:clientA.id,code:"OTHER",name:"Other Project",
+  }});
+  const otherEmployee=await db.pegawai.create({data:{
+    clientId:clientA.id,projectId:secondProject.id,nama:"Other Project Worker",
+    idPegawai:"PROJECT-OTHER-"+suffix,email:"project-other-"+suffix+"@example.com",
+  }});
+  const privatePhotoAttendance=await db.attendance.create({data:{
+    clientId:clientA.id,projectId:secondProject.id,pegawaiId:otherEmployee.id,
+    tanggal:new Date("2026-10-09T00:00:00Z"),status:"HADIR",
+    selfiePath:"/nonexistent/private-synthetic.jpg",
+  }});
+  const crossProjectPhoto=await request("/api/uploads/"+privatePhotoAttendance.id,{headers:{cookie:cookieProject}});
+  assert.equal(crossProjectPhoto.response.status,403,"project manager must not view another project selfie");
+  const crossTenantPhoto=await request("/api/uploads/"+privatePhotoAttendance.id,{headers:{cookie:cookieB}});
+  assert.equal(crossTenantPhoto.response.status,403);
+  console.log("PASS P0 selfie access limited to assigned project and tenant");
+
   // Emergency offboarding must invalidate even already-issued JWT cookies.
   const unauthorizedRevoke=await request("/api/superadmin/admin-accounts/"+inactiveManager.id,{
     method:"PATCH",headers:{cookie:cookieA,"content-type":"application/json"},
