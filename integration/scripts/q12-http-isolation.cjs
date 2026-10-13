@@ -198,6 +198,43 @@ async function main() {
   assert.equal(ptList.response.status,200);
   assert.ok(ptList.body.employees.some(e=>e.id===employeeB.id));
   assert.ok(!ptList.body.employees.some(e=>e.id===employeeA.id));
+  // Real check-in/out must never auto-validate; approval is a separate role-scoped action.
+  await db.clientSetting.create({data:{
+    clientId:clientA.id,workDays:[1,2,3,4,5],holidays:[],
+    attendanceEnabled:true,payrollEnabled:true,requireSelfie:false,
+  }});
+  await db.officeLocation.create({data:{
+    clientId:clientA.id,projectId:projectA.id,name:"Synthetic Office",
+    lat:-6.2,lng:106.8,radiusM:100,isActive:true,
+  }});
+  const sendPresence=async action=>{
+    const form=new FormData();
+    for(const [k,v] of Object.entries({action,lat:"-6.2",lng:"106.8",accuracyM:"12"}))
+      form.set(k,v);
+    return request("/api/absen",{method:"POST",headers:{cookie:cookieEmployee},body:form});
+  };
+  const freshCheckIn=await sendPresence("CHECK_IN");
+  assert.equal(freshCheckIn.response.status,201,JSON.stringify(freshCheckIn.body));
+  const checkinRow=await db.attendance.findUnique({where:{id:freshCheckIn.body.attendanceId}});
+  assert.equal(checkinRow.validatedAt,null,"check-in must not pre-approve attendance");
+  assert.equal(checkinRow.checkOutAt,null,"check-in is incomplete");
+  const doubleCheckIn=await sendPresence("CHECK_IN");
+  assert.equal(doubleCheckIn.response.status,409);
+  const checkedOut=await sendPresence("CHECK_OUT");
+  assert.equal(checkedOut.response.status,201,JSON.stringify(checkedOut.body));
+  const completeRow=await db.attendance.findUnique({where:{id:checkinRow.id}});
+  assert.ok(completeRow.checkOutAt);
+  assert.equal(completeRow.validatedAt,null,"check-out must still require approval");
+  const newReview=await request("/api/attendance/review/"+checkinRow.id,{
+    method:"POST",headers:{cookie:cookieProject,"content-type":"application/json"},
+    body:JSON.stringify({decision:"APPROVE"}),
+  });
+  assert.equal(newReview.response.status,200,JSON.stringify(newReview.body));
+  const validatedRow=await db.attendance.findUnique({where:{id:checkinRow.id}});
+  assert.ok(validatedRow.validatedAt);
+  assert.ok(validatedRow.validatedAt>=completeRow.checkOutAt);
+  console.log("PASS P0 check-in/out remain unvalidated until scoped review");
+
   // Validated presence must be scoped to the acting PT/project and block suspicious cases.
   const attendanceDate=new Date("2026-10-11T00:00:00.000Z");
   const checkInAt=new Date("2026-10-11T01:00:00.000Z");
