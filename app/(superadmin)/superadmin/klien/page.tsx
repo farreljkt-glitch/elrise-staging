@@ -29,7 +29,7 @@ export default function SuperadminClients(){
     }catch(e){setError(e instanceof Error?e.message:"Gagal");}finally{setBusy(false);}
   }
   return <main className="space-y-5 p-5">
-    <h1 className="text-2xl font-bold">Klien Elrise</h1><Link href="/superadmin/undangan-admin" className="inline-block rounded border px-3 py-2 text-sm">Kelola undangan Admin PT / Project →</Link>
+    <h1 className="text-2xl font-bold">Klien Elrise</h1><Link href="/superadmin/undangan-admin" className="inline-block rounded border px-3 py-2 text-sm">Kelola undangan Admin PT / Project →</Link> <Link href="/superadmin/integrasi-gajiku" className="inline-block rounded border px-3 py-2 text-sm">Draft Integrasi Gajiku →</Link>
     <p className="text-sm opacity-70">Sumber data: MySQL. Tenant baru dibuat dengan semua modul dinonaktifkan sampai konfigurasi selesai. Mode awal ELRISE_ONLY.</p>
     {error&&<p role="alert" className="text-red-600">{error}</p>}
     <form onSubmit={create} className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
