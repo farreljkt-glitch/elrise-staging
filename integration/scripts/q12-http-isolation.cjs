@@ -316,6 +316,35 @@ async function main() {
   assert.equal(crossTenantPhoto.response.status,403);
   console.log("PASS P0 selfie access limited to assigned project and tenant");
 
+  // T3: Admin PT provisions a leave type and starting balances, scoped to its own PT.
+  const typeReq=(cookie,body)=>request("/api/admin/leave-types",{
+    method:"POST",headers:{cookie,"content-type":"application/json"},
+    body:JSON.stringify(body),
+  });
+  const ownType=await typeReq(cookieA,{name:"Additional annual "+suffix,paid:true,annualQuota:12});
+  assert.equal(ownType.response.status,201,JSON.stringify(ownType.body));
+  assert.equal((await typeReq(cookieA,{name:"Additional annual "+suffix,paid:true,annualQuota:12})).response.status,409);
+  assert.equal((await typeReq(cookieProject,{name:"Other type",paid:true,annualQuota:12})).response.status,403);
+  assert.equal((await typeReq(cookieEmployee,{name:"Other type",paid:true,annualQuota:12})).response.status,403);
+  const grant=(cookie,employeeIds)=>request("/api/admin/leave-balances",{
+    method:"POST",headers:{cookie,"content-type":"application/json"},
+    body:JSON.stringify({leaveTypeId:ownType.body.type.id,year:2026,quota:12,employeeIds}),
+  });
+  assert.equal((await grant(cookieA,[employeeB.id])).response.status,422);
+  assert.equal((await grant(cookieProject,[employeeA.id])).response.status,403);
+  const initial=await grant(cookieA,[employeeA.id]);
+  assert.equal(initial.response.status,201,JSON.stringify(initial.body));
+  assert.equal(initial.body.created,1);
+  assert.equal((await grant(cookieA,[employeeA.id])).response.status,409);
+  const untouched=await db.leaveBalance.findUnique({where:{
+    pegawaiId_leaveTypeId_year:{
+      pegawaiId:employeeA.id,leaveTypeId:ownType.body.type.id,year:2026,
+    },
+  }});
+  assert.equal(untouched.quota,12);
+  assert.equal(untouched.used,0);
+  console.log("PASS T3 Admin PT type + initial balance, cross-tenant denial and no-overwrite protection");
+
   // T2: employee submission and project-scoped approval with real MySQL balance.
   const annualType=await db.leaveType.create({data:{
     clientId:clientA.id,name:"Annual synthetic "+suffix,unit:"HARI",paid:true,isActive:true,
