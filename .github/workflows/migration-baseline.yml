@@ -22,9 +22,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma validate
-      - name: Generate empty-to-current schema migration candidate
+      - name: Verify committed initial schema matches current Prisma model
         run: |
           npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > /tmp/elrise-baseline.sql
-          echo "BEGIN_ELRISE_BASELINE_SQL"
-          cat /tmp/elrise-baseline.sql
-          echo "END_ELRISE_BASELINE_SQL"
+          diff -u prisma/migrations/20261013000000_initial_baseline/migration.sql /tmp/elrise-baseline.sql
