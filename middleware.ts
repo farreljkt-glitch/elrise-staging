@@ -4,6 +4,7 @@ import { jwtVerify } from "jose";
 const protectedPrefixes: [string, string[]][] = [
   ["/superadmin", ["SUPERADMIN"]],
   ["/admin", ["SUPERADMIN", "ADMIN"]],
+  ["/project", ["ADMIN_PROJECT"]],
   ["/pegawai", ["PEGAWAI"]],
 ];
 
@@ -35,4 +36,4 @@ export async function middleware(req: NextRequest) {
   }
 }
 
-export const config = { matcher: ["/superadmin/:path*", "/admin/:path*", "/pegawai/:path*", "/ganti-password"] };
+export const config = { matcher: ["/superadmin/:path*", "/admin/:path*", "/project/:path*", "/pegawai/:path*", "/ganti-password"] };
