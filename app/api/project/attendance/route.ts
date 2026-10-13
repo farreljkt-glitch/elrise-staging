@@ -17,12 +17,12 @@ export async function GET(request:Request){
     const attendance=await db.attendance.findMany({
       where:{clientId:scope.clientId,projectId:scope.projectId,tanggal:new Date(period+"T00:00:00Z")},
       take:200,orderBy:{createdAt:"desc"},
-      select:{id:true,status:true,checkInAt:true,checkOutAt:true,validatedAt:true,
+      select:{id:true,status:true,checkInAt:true,checkOutAt:true,validatedAt:true,suspiciousFlags:true,
         pegawai:{select:{idPegawai:true,nama:true}}},
     });
     return NextResponse.json({date:period,rows:attendance.map(a=>({
       id:a.id,code:a.pegawai.idPegawai,name:a.pegawai.nama,status:a.status,
-      checkedInAt:a.checkInAt?.toISOString()||null,validated:Boolean(a.validatedAt),
+      checkedInAt:a.checkInAt?.toISOString()||null,checkedOutAt:a.checkOutAt?.toISOString()||null,validated:Boolean(a.validatedAt),suspicious:a.suspiciousFlags!==null&&JSON.stringify(a.suspiciousFlags)!=="[]"&&JSON.stringify(a.suspiciousFlags)!=="{}",
     }))},{headers:{"Cache-Control":"no-store"}});
   }catch{return NextResponse.json({error:"Absensi tidak tersedia"},{status:503});}
 }

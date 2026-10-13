@@ -34,7 +34,7 @@ export async function GET(request: Request) {
         id:r.id, code:r.pegawai.idPegawai, name:r.pegawai.nama, project:r.project.name,
         status:r.status, checkedInAt:r.checkInAt?.toISOString()??null,
         checkedOutAt:r.checkOutAt?.toISOString()??null,
-        validated:Boolean(r.validatedAt), suspicious: r.suspiciousFlags!==null,
+        validated:Boolean(r.validatedAt), suspicious: r.suspiciousFlags!==null && JSON.stringify(r.suspiciousFlags)!=="[]" && JSON.stringify(r.suspiciousFlags)!=="{}",
       })) }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "Gagal membaca absensi" }, { status: 503 });
