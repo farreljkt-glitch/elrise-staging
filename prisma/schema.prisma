@@ -109,6 +109,7 @@ model Client {
   integrationConnection IntegrationConnection?
   bundleSubscription    BundleSubscription?
   loanPolicies          BundleLoanPolicy[]
+  kasbonRequests        KasbonRequest[]
 
   @@index([status])
 }
@@ -221,6 +222,7 @@ model Pegawai {
   leaveRequests          LeaveRequest[]
   leaveBalances          LeaveBalance[]
   payrollItems           PayrollItem[]
+  kasbonRequests         KasbonRequest[]
   integrationEmployeeMap IntegrationEmployeeMap?
 
   @@unique([clientId, email])
@@ -613,4 +615,35 @@ model AdminInvitation {
 
   @@index([userId, usedAt])
   @@index([clientId, createdAt])
+}
+
+
+/** Internal Elrise intake only. REVIEWED_HOLD is NOT a financial approval or Gajiku transaction. */
+enum KasbonRequestStatus {
+  PENDING_REVIEW
+  REVIEWED_HOLD
+  REJECTED
+}
+
+model KasbonRequest {
+  id           String              @id @default(cuid())
+  clientId     String
+  pegawaiId    String
+  amount       BigInt
+  periodCode   String              @db.VarChar(7)
+  cycle        PayrollCycle
+  requestKey   String              @db.VarChar(64)
+  purpose      String              @db.VarChar(500)
+  status       KasbonRequestStatus @default(PENDING_REVIEW)
+  reviewerId   String?
+  reviewedAt   DateTime?
+  reviewReason String?             @db.VarChar(500)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  client       Client              @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  pegawai      Pegawai             @relation(fields: [clientId, pegawaiId], references: [clientId, id], onDelete: Restrict)
+
+  @@unique([clientId, pegawaiId, requestKey])
+  @@index([clientId, status, createdAt])
+  @@index([clientId, pegawaiId, createdAt])
 }
