@@ -27,6 +27,7 @@ export default function GantiPasswordPage() {
       const data = await sessionResponse.json(); const role = data?.user?.role;
       if (role === "SUPERADMIN") router.replace("/superadmin/dashboard");
       else if (role === "ADMIN") router.replace("/admin/dashboard");
+      else if (role === "ADMIN_PROJECT") router.replace("/project/dashboard");
       else if (role === "PEGAWAI") router.replace("/pegawai/dashboard");
       else router.replace("/login");
       router.refresh();

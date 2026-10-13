@@ -584,3 +584,17 @@ model EmployeeInvitation {
   @@index([userId, usedAt])
   @@index([clientId, createdAt])
 }
+
+/** Single-use invitation for privileged accounts. Never expose unhashed token via DB or logs. */
+model AdminInvitation {
+  id        String   @id @default(cuid())
+  userId    String
+  clientId  String
+  tokenHash String   @unique @db.Char(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, usedAt])
+  @@index([clientId, createdAt])
+}
