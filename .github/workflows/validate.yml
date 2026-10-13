@@ -91,6 +91,8 @@ jobs:
           exit 1
       - name: Test real HTTP session and tenant isolation
         run: node integration/scripts/q12-http-isolation.cjs
+      - name: Exercise Elrise policy APIs against disposable MySQL
+        run: node integration/scripts/sprint2-loan-policy-http.cjs
       - name: Stop test server
         if: always()
         run: if test -f /tmp/elrise-q12-next.pid; then kill $(cat /tmp/elrise-q12-next.pid) || true; fi
