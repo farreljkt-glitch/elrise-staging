@@ -1,7 +1,7 @@
 import { calculatePayrollPeriodRange, type PayrollCycleType } from "./period-mapping";
 
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const month=/^20\\d{2}-(0[1-9]|1[0-2])$/;
+const month=/^20\d{2}-(0[1-9]|1[0-2])$/;
 export const MAX_REQUEST_IDR=1_000_000_000_000n;
 
 export function parseKasbonSubmission(value:unknown){
@@ -9,7 +9,7 @@ export function parseKasbonSubmission(value:unknown){
   const obj=value as Record<string,unknown>;
   if(Object.keys(obj).some(k=>!["amountIdr","purpose","requestKey"].includes(k)))
     throw new Error("Field kasbon tidak diizinkan");
-  if(typeof obj.amountIdr!=="string"||!/^[1-9]\\d{0,12}$/.test(obj.amountIdr))
+  if(typeof obj.amountIdr!=="string"||!/^[1-9]\d{0,12}$/.test(obj.amountIdr))
     throw new Error("Nominal wajib rupiah bulat positif");
   const amount=BigInt(obj.amountIdr);
   if(amount<10_000n||amount>MAX_REQUEST_IDR)throw new Error("Nominal di luar batas pengajuan");
