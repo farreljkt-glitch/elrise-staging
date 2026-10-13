@@ -102,7 +102,7 @@ async function run(){
    pegawaiId:b.employee.id,tanggal,status,
    checkInAt:at(3600000),checkOutAt:at(9*3600000),
    validatedAt:approved?at(10*3600000):null,
-   suspiciousFlags:flags,
+   ...(flags?{suspiciousFlags:flags}:{}),
   }});
  };
  await presence(0,"HADIR");
