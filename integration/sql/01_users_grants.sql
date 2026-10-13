@@ -1,4 +1,6 @@
--- DEPRECATED/UNVERIFIED LEGACY SQL. DO NOT EXECUTE ON GAJIKU LIVE OR ELRISE PRODUCTION.\n-- This script assumes hris_db and unverified Gajiku table columns; use reviewed staging migrations only.\n-- Jalankan sebagai DBA/root MySQL setelah mengganti placeholder password.
+-- DEPRECATED/UNVERIFIED LEGACY SQL. DO NOT EXECUTE ON GAJIKU LIVE OR ELRISE PRODUCTION.
+-- This script assumes hris_db and unverified Gajiku table columns; use reviewed staging migrations only.
+-- Jalankan sebagai DBA/root MySQL setelah mengganti placeholder password.
 -- Sesuaikan host akun dengan DATABASE_URL aktual dan akun gajiku_app yang benar.
 CREATE DATABASE IF NOT EXISTS hris_db CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 CREATE USER IF NOT EXISTS 'hris_app'@'127.0.0.1' IDENTIFIED BY 'GANTI_PASSWORD_KUAT_HRIS';
