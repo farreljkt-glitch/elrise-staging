@@ -56,7 +56,8 @@ export async function POST(req:Request){
   let input:ReturnType<typeof parseKasbonSubmission>;
   try{input=parseKasbonSubmission(await req.json());}
   catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Pengajuan tidak valid"},{status:400});}
-  const {clientId,pegawaiId}=actor;
+  const clientId=actor.clientId!;
+  const pegawaiId=actor.pegawaiId!;
   const lookup={clientId_pegawaiId_requestKey:{
     clientId,pegawaiId,requestKey:input.requestKey,
   }};
