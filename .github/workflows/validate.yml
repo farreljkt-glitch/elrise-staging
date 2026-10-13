@@ -2,7 +2,7 @@ name: Elrise validation
 
 on:
   push:
-    branches: [main, "phase/**"]
+    branches: [main, "phase/**", "demo/**"]
   pull_request:
     branches: [main]
 
@@ -17,6 +17,7 @@ jobs:
       DATABASE_URL: mysql://elrise_ci:unused@127.0.0.1:3306/elrise_ci
       AUTH_SECRET: ci-only-placeholder-secret-at-least-32-bytes-long
       PROXY_TRUST_SECRET: ci-only-proxy-shared-secret-at-least-32-bytes-long
+      UPLOAD_DIR: /tmp/elrise-ci-demo-photos
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -95,6 +96,8 @@ jobs:
         run: node integration/scripts/sprint2-loan-policy-http.cjs
       - name: Test employee kasbon intake and Admin PT HOLD/reject against disposable MySQL
         run: node integration/scripts/sprint2-kasbon-review-http.cjs
+      - name: Test no-manual-DB demo flow through real HTTP
+        run: node integration/scripts/demo-admin-pt-flow-http.cjs
       - name: Stop test server
         if: always()
         run: if test -f /tmp/elrise-q12-next.pid; then kill $(cat /tmp/elrise-q12-next.pid) || true; fi
