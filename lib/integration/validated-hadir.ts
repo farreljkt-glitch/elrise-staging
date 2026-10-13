@@ -1,4 +1,4 @@
-import { hasAttendanceFlags } from "@/lib/attendance/review-guard";
+import { hasAttendanceFlags } from "../attendance/review-guard";
 /** Only fully reviewed HADIR (not TELAT) dates count toward V1 loan accrual. */
 export type AttendanceEvidence={
   tanggal:Date;status:string;checkInAt:Date|null;checkOutAt:Date|null;
