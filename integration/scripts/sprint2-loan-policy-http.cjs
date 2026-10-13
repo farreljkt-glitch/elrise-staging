@@ -93,9 +93,9 @@ async function run(){
  // Loan accrual must count only reviewed, complete, unflagged HADIR in payroll cycle.
  const lastMonthEnd=new Date(Date.UTC(new Date().getUTCFullYear(),new Date().getUTCMonth(),0));
  const targetPeriod=lastMonthEnd.toISOString().slice(0,7);
- const day=offset=>new Date(lastMonthEnd.getTime()-offset*86400000);
+ const attendanceDay=offset=>new Date(lastMonthEnd.getTime()-offset*86400000);
  const presence=async(offset,status,flags=null,approved=true)=>{
-  const tanggal=day(offset);
+  const tanggal=attendanceDay(offset);
   const at=ms=>new Date(tanggal.getTime()+ms);
   return db.attendance.create({data:{
    clientId:b.tenant.id,projectId:(await db.pegawai.findUnique({where:{id:b.employee.id}})).projectId,
