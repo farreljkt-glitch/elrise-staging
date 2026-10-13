@@ -316,6 +316,46 @@ async function main() {
   assert.equal(crossTenantPhoto.response.status,403);
   console.log("PASS P0 selfie access limited to assigned project and tenant");
 
+  // T2: employee submission and project-scoped approval with real MySQL balance.
+  const annualType=await db.leaveType.create({data:{
+    clientId:clientA.id,name:"Annual synthetic "+suffix,unit:"HARI",paid:true,isActive:true,
+  }});
+  await db.leaveBalance.create({data:{
+    clientId:clientA.id,pegawaiId:employeeA.id,leaveTypeId:annualType.id,
+    year:2026,quota:10,used:0,
+  }});
+  const requestLeave=(cookie,startDate,endDate)=>request("/api/leave-requests",{
+    method:"POST",headers:{cookie,"content-type":"application/json"},
+    body:JSON.stringify({leaveTypeId:annualType.id,startDate,endDate,reason:"Synthetic family request"}),
+  });
+  const ownLeave=await requestLeave(cookieAEmployee,"2026-10-20","2026-10-21");
+  assert.equal(ownLeave.response.status,201,JSON.stringify(ownLeave.body));
+  assert.equal(ownLeave.body.workdays,2);
+  assert.equal((await requestLeave(cookieAEmployee,"2026-10-21","2026-10-22")).response.status,422);
+  assert.equal((await requestLeave(cookieB,"2026-10-23","2026-10-23")).response.status,403);
+  const approveLeave=(cookie,decision)=>request("/api/leave-requests/"+ownLeave.body.id,{
+    method:"PATCH",headers:{cookie,"content-type":"application/json"},
+    body:JSON.stringify({decision}),
+  });
+  assert.equal((await approveLeave(cookieB,"APPROVE")).response.status,404);
+  assert.equal((await approveLeave(cookieEmployee,"APPROVE")).response.status,403);
+  const approvedLeave=await approveLeave(cookieProject,"APPROVE");
+  assert.equal(approvedLeave.response.status,200,JSON.stringify(approvedLeave.body));
+  assert.equal(approvedLeave.body.result,"APPROVED");
+  const balanceAfter=await db.leaveBalance.findUnique({where:{
+    pegawaiId_leaveTypeId_year:{pegawaiId:employeeA.id,leaveTypeId:annualType.id,year:2026},
+  }});
+  assert.equal(balanceAfter.used,2);
+  assert.equal((await approveLeave(cookieProject,"APPROVE")).response.status,409);
+  assert.equal((await db.leaveBalance.findUnique({where:{id:balanceAfter.id}})).used,2);
+  const employeeLeaveList=await request("/api/leave-requests",withCookie(cookieAEmployee));
+  assert.equal(employeeLeaveList.response.status,200);
+  assert.ok(employeeLeaveList.body.rows.some(x=>x.id===ownLeave.body.id&&x.status==="DISETUJUI"));
+  const foreignLeaveList=await request("/api/leave-requests",withCookie(cookieB));
+  assert.equal(foreignLeaveList.response.status,200);
+  assert.ok(!foreignLeaveList.body.rows.some(x=>x.id===ownLeave.body.id));
+  console.log("PASS T2 real MySQL leave submission, scope, approval, balance and replay");
+
   // Emergency offboarding must invalidate even already-issued JWT cookies.
   const unauthorizedRevoke=await request("/api/superadmin/admin-accounts/"+inactiveManager.id,{
     method:"PATCH",headers:{cookie:cookieA,"content-type":"application/json"},
