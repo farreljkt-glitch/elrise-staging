@@ -198,6 +198,36 @@ async function main() {
   assert.equal(ptList.response.status,200);
   assert.ok(ptList.body.employees.some(e=>e.id===employeeB.id));
   assert.ok(!ptList.body.employees.some(e=>e.id===employeeA.id));
+  // Emergency offboarding must invalidate even already-issued JWT cookies.
+  const unauthorizedRevoke=await request("/api/superadmin/admin-accounts/"+inactiveManager.id,{
+    method:"PATCH",headers:{cookie:cookieA,"content-type":"application/json"},
+    body:JSON.stringify({active:false}),
+  });
+  assert.equal(unauthorizedRevoke.response.status,403);
+  const invalidRevoke=await request("/api/superadmin/admin-accounts/"+inactiveManager.id,{
+    method:"PATCH",headers:{cookie:cookieSuper,"content-type":"application/json"},
+    body:JSON.stringify({active:true}),
+  });
+  assert.equal(invalidRevoke.response.status,400);
+  const revoked=await request("/api/superadmin/admin-accounts/"+inactiveManager.id,{
+    method:"PATCH",headers:{cookie:cookieSuper,"content-type":"application/json"},
+    body:JSON.stringify({active:false}),
+  });
+  assert.equal(revoked.response.status,200,JSON.stringify(revoked.body));
+  const oldSession=await request("/api/project/team",withCookie(cookieManager));
+  assert.equal(oldSession.response.status,403,"offboarded admin old session must be revoked");
+  const loginRevoked=await request("/api/auth/login",{
+    method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({email:adminProjectEmail,password:managerPassword}),
+  });
+  assert.equal(loginRevoked.response.status,401);
+  const revokedAgain=await request("/api/superadmin/admin-accounts/"+inactiveManager.id,{
+    method:"PATCH",headers:{cookie:cookieSuper,"content-type":"application/json"},
+    body:JSON.stringify({active:false}),
+  });
+  assert.equal(revokedAgain.response.status,409);
+  console.log("PASS S4 privileged access revocation and JWT invalidation");
+
   console.log("PASS S3 Superadmin privileged invitations and role-scoped activation");
 
   console.log("PASS Q12 real HTTP tenant and project isolation");
