@@ -23,7 +23,12 @@ export async function GET(request:Request){
    const [year,month]=period.split("-").map(Number);
    const cycle=employee.siklusGaji;
    const range=calculatePayrollPeriodRange(cycle,year,month);
-   const today=new Date(new Date().toISOString().slice(0,10)+"T00:00:00.000Z");
+   // Attendance stores WIB calendar days in MySQL @db.Date, not UTC server dates.
+   const wibParts=new Intl.DateTimeFormat("en-US",{
+     timeZone:"Asia/Jakarta",year:"numeric",month:"2-digit",day:"2-digit",
+   }).formatToParts(new Date());
+   const val=(type:string)=>wibParts.find(p=>p.type===type)?.value??"";
+   const today=new Date(val("year")+"-"+val("month")+"-"+val("day")+"T00:00:00.000Z");
    const periodEndDate=new Date(range.endDate.toISOString().slice(0,10)+"T00:00:00.000Z");
    const cutoff=today<periodEndDate?today:periodEndDate;
    const [attendance,subscription,connection,mapping,settings,override,defaultPolicy]=await Promise.all([
