@@ -1,0 +1,30 @@
+name: Elrise migration baseline proposal
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schema-proposal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: mysql://ci-only:ci-only@127.0.0.1:3306/elrise_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npx prisma validate
+      - name: Generate empty-to-current schema migration candidate
+        run: |
+          npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > /tmp/elrise-baseline.sql
+          echo "BEGIN_ELRISE_BASELINE_SQL"
+          cat /tmp/elrise-baseline.sql
+          echo "END_ELRISE_BASELINE_SQL"
