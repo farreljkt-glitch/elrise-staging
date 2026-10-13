@@ -61,6 +61,14 @@ ALTER TABLE `IntegrationEmployeeMap` DROP FOREIGN KEY `IntegrationEmployeeMap_co
 -- DropForeignKey
 ALTER TABLE `IntegrationEmployeeMap` DROP FOREIGN KEY `IntegrationEmployeeMap_pegawaiId_fkey`;
 
+-- MySQL retains implicit single-column FK backing indexes after removing old
+-- references. They are no longer represented in Prisma's composite relations.
+DROP INDEX `User_managedProjectId_fkey` ON `User`;
+DROP INDEX `Pegawai_projectId_fkey` ON `Pegawai`;
+DROP INDEX `AttendanceCorrection_pegawaiId_fkey` ON `AttendanceCorrection`;
+DROP INDEX `LeaveRequest_leaveTypeId_fkey` ON `LeaveRequest`;
+DROP INDEX `KasbonSettlement_payrollItemId_fkey` ON `KasbonSettlement`;
+
 -- AlterTable
 ALTER TABLE `PayrollItem` ADD COLUMN `clientId` VARCHAR(191) NULL;
 
