@@ -227,8 +227,10 @@ async function run(){
   const afterCheckout=await db.attendance.findUnique({where:{id}});
   assert.ok(afterCheckout.checkOutAt>afterCheckout.checkInAt);
   assert.equal(afterCheckout.validatedAt,null);
-  const date=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Jakarta",
-    year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  const dateParts=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Jakarta",
+    year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+  const part=name=>dateParts.find(p=>p.type===name)?.value||"";
+  const date=part("year")+"-"+part("month")+"-"+part("day");
   const attendance=await requireStatus("/api/project/attendance?date="+date,{cookie:manager},200);
   assert.ok(attendance.rows.some(x=>x.id===id));
   assert.equal((await request("/api/project/attendance?date="+date+
