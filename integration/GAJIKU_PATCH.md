@@ -1,3 +1,5 @@
+> **DEPRECATED — JANGAN DIPAKAI SEBAGAI KONTRAK PRODUKSI.** Dokumen lama ini memakai gaji pokok + join email/view SQL. Kontrak baru adalah persentase pre-kasbon THP atau plafon tetap yang efektif per tanggal dengan mapping tenant/pegawai terverifikasi. Rujuk `integration/PHASE_Q7_CONTRACT_AUDIT.md`, `integration/GAJIKU_API_CONTRACT_V1.md`, dan `docs/PRODUCTION_READINESS_ROADMAP.md`. Tidak boleh mengeksekusi patch di Gajiku Live berdasarkan spesifikasi lama.
+
 # Integrasi HRIS ↔ Gajiku-Live — spesifikasi (BELUM diterapkan ke Gajiku)
 
 Status: prototipe untuk presentasi, belum ada klien/MOU. Kode Gajiku **tidak diubah**. Dokumen ini adalah
