@@ -1,5 +1,6 @@
 "use client";
 import { useEffect,useState } from "react";
+import { LoanAccrualReadiness } from "@/components/integration/LoanAccrualReadiness";
 type Employee={id:string;code:string;name:string};
 type Policy={id:string;pegawaiId:string|null;mode:string;percentBps:number|null;
   fixedAmountIdr:string|null;denominatorDays:number;effectiveAt:string};
@@ -112,6 +113,7 @@ export default function AdminKasbonPolicyPage(){
         {busy?"Menyimpan...":"Simpan kebijakan Elrise"}
       </button>
     </form>
+    <LoanAccrualReadiness employees={employees}/>
     <section className="space-y-2 rounded-lg border p-4">
       <h2 className="font-semibold">Riwayat kebijakan PT ({data?.policies.length??0} ditampilkan)</h2>
       {data?.policies.map(p=><div key={p.id} className="border-b py-2 text-sm">
