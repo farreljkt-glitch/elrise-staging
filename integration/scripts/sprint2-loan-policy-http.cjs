@@ -90,6 +90,40 @@ async function run(){
  assert.equal(await db.bundleLoanPolicy.count({where:{clientId:b.tenant.id}}),2);
  assert.equal(await db.bundleLoanPolicy.count({where:{clientId:a.tenant.id}}),0);
  console.log("PASS Admin PT policy append-only writes, employee scope and percentage/fixed money");
+ // Loan accrual must count only reviewed, complete, unflagged HADIR in payroll cycle.
+ const lastMonthEnd=new Date(Date.UTC(new Date().getUTCFullYear(),new Date().getUTCMonth(),0));
+ const targetPeriod=lastMonthEnd.toISOString().slice(0,7);
+ const attendanceDay=offset=>new Date(lastMonthEnd.getTime()-offset*86400000);
+ const presence=async(offset,status,flags=null,approved=true)=>{
+  const tanggal=attendanceDay(offset);
+  const at=ms=>new Date(tanggal.getTime()+ms);
+  return db.attendance.create({data:{
+   clientId:b.tenant.id,projectId:(await db.pegawai.findUnique({where:{id:b.employee.id}})).projectId,
+   pegawaiId:b.employee.id,tanggal,status,
+   checkInAt:at(3600000),checkOutAt:at(9*3600000),
+   validatedAt:approved?at(10*3600000):null,
+   ...(flags?{suspiciousFlags:flags}:{}),
+  }});
+ };
+ await presence(0,"HADIR");
+ await presence(1,"TELAT");
+ await presence(2,"HADIR",["gps_mismatch"]);
+ await presence(3,"HADIR",null,false);
+ const path="/api/admin/loan-accrual?pegawaiId="+encodeURIComponent(b.employee.id)+
+   "&period="+encodeURIComponent(targetPeriod);
+ const readiness=await fetch(base+path,{headers:{cookie:cookieB},redirect:"manual"});
+ const preview=await readiness.json();
+ assert.equal(readiness.status,200,JSON.stringify(preview));
+ assert.equal(preview.validatedHadirDays,1,"only reviewed HADIR without flags is eligible");
+ assert.equal(preview.availableLoanIdr,null,"no monetary loan balance before verified THP/outstanding");
+ assert.equal(preview.readyForDisbursement,false);
+ assert.ok(preview.blockers.includes("PRE_KASBON_THP_NOT_FINANCE_VERIFIED"));
+ const unauthorized=await fetch(base+path,{headers:{cookie:cookieA},redirect:"manual"});
+ assert.equal(unauthorized.status,404,"other PT cannot see employee presence");
+ const badPeriod=await fetch(base+"/api/admin/loan-accrual?pegawaiId="+b.employee.id+
+   "&period=W:2026-10-05",{headers:{cookie:cookieB},redirect:"manual"});
+ assert.equal(badPeriod.status,400);
+ console.log("PASS Sprint2 read-only validated HADIR tenant isolation; no loan payout");
  console.log("PASS Sprint2 Elrise policy API, no Gajiku network calls");
 }
 run().catch(e=>{
