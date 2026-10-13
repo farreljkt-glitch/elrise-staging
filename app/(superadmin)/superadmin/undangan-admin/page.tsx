@@ -14,6 +14,7 @@ export default function SuperadminInvites(){
   const [admins,setAdmins]=useState<Admin[]>([]);
   const [token,setToken]=useState("");const [expiresAt,setExpiresAt]=useState("");
   const [busy,setBusy]=useState(false);const [error,setError]=useState("");
+  const [message,setMessage]=useState("");
   useEffect(()=>{void fetch("/api/superadmin/clients",{cache:"no-store"})
     .then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||"Gagal memuat PT");return d;})
     .then(d=>{const arr=d.clients as Client[];setClients(arr);setClientId(arr[0]?.id||"");})
@@ -29,6 +30,20 @@ export default function SuperadminInvites(){
       .catch(()=>{if(mounted)setError("Gagal membaca proyek atau akun");});
     return()=>{mounted=false;};
   },[clientId]);
+  async function revoke(admin:Admin){
+    if(!window.confirm("Cabut akses login "+admin.name+"? Sesi aktif akan langsung tidak berlaku."))return;
+    setBusy(true);setError("");setMessage("");
+    try{
+      const r=await fetch("/api/superadmin/admin-accounts/"+encodeURIComponent(admin.id),{
+        method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({active:false}),
+      });
+      const d=await r.json();if(!r.ok)throw new Error(d.error||"Gagal menonaktifkan");
+      const updated=await fetch("/api/superadmin/admin-accounts?clientId="+encodeURIComponent(clientId),{cache:"no-store"});
+      if(updated.ok)setAdmins((await updated.json()).admins);
+      setMessage("Akses admin dinonaktifkan dan seluruh sesi lama dicabut.");
+    }catch(e){setError(e instanceof Error?e.message:"Gagal menonaktifkan");}
+    finally{setBusy(false);}
+  }
   async function invite(e:React.FormEvent){
     e.preventDefault();setBusy(true);setError("");setToken("");
     try{
@@ -50,6 +65,7 @@ export default function SuperadminInvites(){
     <h1 className="text-2xl font-bold">Undangan Admin PT / Admin Project</h1>
     <p className="text-sm opacity-70">Akun dibuat nonaktif. Hanya aktif setelah undangan sekali pakai digunakan. Tautan bersifat rahasia, bagikan lewat kanal privat.</p>
     {error&&<p role="alert" className="text-red-600">{error}</p>}
+    {message&&<p role="status" className="text-sm">{message}</p>}
     <form onSubmit={invite} className="space-y-3 rounded-xl border p-4">
       <label className="block text-sm">PT
         <select required value={clientId} onChange={e=>setClientId(e.target.value)} className="mt-1 block w-full rounded border p-2">
@@ -83,7 +99,9 @@ export default function SuperadminInvites(){
     </section>}
     <section className="space-y-2 rounded-xl border p-4">
       <h2 className="font-semibold">Akun Admin PT / Project</h2>
-      {admins.map(a=><p key={a.id} className="border-b py-2 text-sm">{a.name} · {a.email} — {a.role} {a.managedProject?.name||""} — {a.isActive?"Aktif":"Belum aktif"}</p>)}
+      {admins.map(a=><p key={a.id} className="border-b py-2 text-sm">{a.name} · {a.email} — {a.role} {a.managedProject?.name||""} — {a.isActive?"Aktif":"Belum aktif"}
+        {a.isActive&&<button disabled={busy} onClick={()=>void revoke(a)} className="ml-3 rounded border border-red-600 px-2 py-1 text-red-600 disabled:opacity-50">Nonaktifkan</button>}
+      </p>)}
       {!admins.length&&<p className="text-sm opacity-70">Belum ada akun admin.</p>}
     </section>
   </main>;
