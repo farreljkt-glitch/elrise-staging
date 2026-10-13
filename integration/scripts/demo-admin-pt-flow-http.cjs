@@ -141,6 +141,16 @@ async function run(){
   assert.equal((await request(invitePath,{cookie:adminB})).data.admins.some(x=>x.email===managerEmail),false);
   await activateAdmin(managerInvite.token);
   const manager=await login(managerEmail);
+  assert.equal((await request("/project/dashboard")).status,307,
+    "anonymous Admin Project page should redirect");
+  assert.equal((await request("/project/dashboard",{cookie:adminA})).status,307,
+    "Admin PT must not open Admin Project page");
+  assert.equal((await request("/project/dashboard",{cookie:manager})).status,200,
+    "invited manager can open project dashboard");
+  assert.equal((await request("/admin/project",{cookie:adminA})).status,200,
+    "Admin PT can open project self-service page");
+  assert.equal((await request("/admin/admin-project",{cookie:adminA})).status,200,
+    "Admin PT can open invitation self-service page");
   assert.equal((await db.user.findUnique({where:{email:managerEmail}})).isActive,true);
   assert.equal((await request(invitePath,{cookie:manager,method:"POST",body:inviteData})).status,403);
   assert.equal((await request("/api/admin/projects",{cookie:manager})).status,403);
