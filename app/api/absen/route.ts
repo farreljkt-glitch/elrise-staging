@@ -76,6 +76,16 @@ export async function POST(req:Request) {
     }
 
     if(parsed.data.action==="CHECK_OUT"&&(!existing?.checkInAt||existing.checkOutAt)) return NextResponse.json({message:"Check-out tidak valid. Pastikan check-in sudah tercatat dan belum check-out."},{status:409});
+    if(parsed.data.action==="CHECK_IN"){
+      const approvedLeave=await db.leaveRequest.findFirst({
+        where:{clientId:client.id,pegawaiId:employee.id,status:"DISETUJUI",
+          startDate:{lte:today},endDate:{gte:today}},
+        select:{id:true},
+      });
+      if(approvedLeave)return NextResponse.json({
+        message:"Hari ini tercatat sebagai cuti disetujui. Hubungi Admin PT untuk koreksi.",
+      },{status:409});
+    }
     const ip=getVerifiedClientIp(req.headers);
     const ipValid=!!ip&&client.officeIps.some(x=>x.ipAddress===ip);
     const rule=setting.attendanceNetworkRule;
