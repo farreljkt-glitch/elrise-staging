@@ -14,14 +14,19 @@ export async function GET(){
     const admins=await db.user.findMany({
       where:{clientId:actor.clientId,role:"ADMIN_PROJECT"},
       select:{id:true,name:true,email:true,isActive:true,
-        managedProject:{select:{id:true,name:true,code:true,isActive:true}},
-        adminInvitations:{select:{expiresAt:true,usedAt:true},orderBy:{createdAt:"desc"},take:1}},
-      },orderBy:{name:"asc"},take:200,
+        managedProject:{select:{id:true,name:true,code:true,isActive:true}}},
+      orderBy:{name:"asc"},take:200,
     });
+    const invitations=admins.length?await db.adminInvitation.findMany({
+      where:{clientId:actor.clientId,userId:{in:admins.map(a=>a.id)}},
+      select:{userId:true,expiresAt:true,usedAt:true},
+      orderBy:{createdAt:"desc"},take:400,
+    }):[];
+    const latest=new Map<string,{expiresAt:Date;usedAt:Date|null}>();
+    for(const invitation of invitations)if(!latest.has(invitation.userId))
+      latest.set(invitation.userId,{expiresAt:invitation.expiresAt,usedAt:invitation.usedAt});
     return NextResponse.json({admins:admins.map(a=>({
-      id:a.id,name:a.name,email:a.email,isActive:a.isActive,
-      managedProject:a.managedProject,
-      invitation:a.adminInvitations[0]??null,
+      ...a,invitation:latest.get(a.id)??null,
     }))},{headers:{"Cache-Control":"no-store"}});
   }catch{
     return NextResponse.json({error:"Daftar Admin Project tidak tersedia"},{status:503});

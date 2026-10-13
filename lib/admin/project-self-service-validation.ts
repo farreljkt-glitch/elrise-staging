@@ -1,5 +1,5 @@
-import { parseNewProject } from "@/lib/superadmin/validation";
-import { parseInviteAdmin } from "@/lib/superadmin/admin-invitation-validation";
+import { parseNewProject } from "../superadmin/validation";
+import { parseInviteAdmin } from "../superadmin/admin-invitation-validation";
 
 /** Never accept clientId, role, passwordHash or activation fields from Admin PT. */
 export function parseAdminPtProject(body:unknown,clientId:string){
