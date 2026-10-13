@@ -83,6 +83,55 @@ async function main() {
   }), /rollback settlement/);
   assert.equal(await db.integrationSettlementOutbox.count({ where: { eventId: rollbackEventId } }), 0);
   console.log("PASS outbox transaction rollback");
+  // P0: physical foreign keys reject cross-tenant pointers even if a future route
+  // accidentally omits a clientId filter. These must fail at the MySQL layer.
+  const foreignKeyError = err => err?.code === "P2003";
+  await assert.rejects(db.pegawai.create({ data: {
+    clientId:a.id,projectId:pb.id,idPegawai:"CROSS-"+suffix,
+    email:"cross-"+suffix+"@example.invalid",nama:"Wrong project",
+  } }),foreignKeyError);
+  await assert.rejects(db.attendance.create({ data: {
+    clientId:a.id,projectId:pa.id,pegawaiId:employeeB.id,
+    tanggal:new Date("2026-10-12T00:00:00Z"),status:"HADIR",
+  } }),foreignKeyError);
+  const secondProject=await db.project.create({data:{clientId:a.id,code:"SECOND",name:"Second project"}});
+  await assert.rejects(db.attendance.create({data:{
+    clientId:a.id,projectId:secondProject.id,pegawaiId:employeeA.id,
+    tanggal:new Date("2026-10-13T00:00:00Z"),status:"HADIR",
+  }}),foreignKeyError);
+  const period=await db.payrollPeriod.create({data:{
+    clientId:a.id,name:"October synthetic",periodCode:"2026-10",
+    cycle:"A",startDate:new Date("2026-10-01T00:00:00Z"),
+    endDate:new Date("2026-10-31T00:00:00Z"),createdById:"ci",
+  }});
+  await assert.rejects(db.payrollItem.create({data:{
+    clientId:a.id,payrollPeriodId:period.id,pegawaiId:employeeB.id,
+  }}),foreignKeyError);
+  await assert.rejects(db.payrollItem.create({data:{
+    clientId:b.id,payrollPeriodId:period.id,pegawaiId:employeeB.id,
+  }}),foreignKeyError);
+  const item=await db.payrollItem.create({data:{
+    clientId:a.id,payrollPeriodId:period.id,pegawaiId:employeeA.id,
+  }});
+  await assert.rejects(db.kasbonSettlement.create({data:{
+    clientId:b.id,payrollItemId:item.id,gajikuTxId:"cross-tx-"+suffix,
+    nominal:100n,adminFee:0n,
+  }}),foreignKeyError);
+  const connection=await db.integrationConnection.create({data:{
+    clientId:a.id,externalTenantId:"external-"+suffix,
+  }});
+  await assert.rejects(db.integrationEmployeeMap.create({data:{
+    clientId:a.id,connectionId:connection.id,pegawaiId:employeeB.id,
+    externalEmployeeId:"foreign-"+suffix,
+  }}),foreignKeyError);
+  const leaveType=await db.leaveType.create({data:{clientId:b.id,name:"Other PT leave"}});
+  await assert.rejects(db.leaveRequest.create({data:{
+    clientId:a.id,pegawaiId:employeeA.id,leaveTypeId:leaveType.id,
+    startDate:new Date("2026-10-14T00:00:00Z"),
+    endDate:new Date("2026-10-14T00:00:00Z"),reason:"Cross-tenant check",
+  }}),foreignKeyError);
+  console.log("PASS P0 composite FKs deny cross-tenant employee, project, leave and payroll links");
+
   console.log("PASS Q11 disposable MySQL transaction integration checks");
 }
 main().catch(err => {
