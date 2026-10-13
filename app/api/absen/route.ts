@@ -9,20 +9,13 @@ import { db } from "@/lib/db";
 import { getSession, requestMetadata } from "@/lib/auth-server";
 import { validateGpsAttendance } from "@/lib/geo";
 import { writeAudit } from "@/lib/audit";
+import { getVerifiedClientIp } from "@/lib/auth/verified-proxy-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const locationSchema = z.object({ action:z.enum(["CHECK_IN","CHECK_OUT"]), lat:z.coerce.number().min(-90).max(90), lng:z.coerce.number().min(-180).max(180), accuracyM:z.coerce.number().positive().max(10000) });
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 function localDateOnly(now:Date) { return new Date(Date.UTC(Number(new Intl.DateTimeFormat("en",{timeZone:"Asia/Jakarta",year:"numeric"}).format(now)), Number(new Intl.DateTimeFormat("en",{timeZone:"Asia/Jakarta",month:"2-digit"}).format(now))-1, Number(new Intl.DateTimeFormat("en",{timeZone:"Asia/Jakarta",day:"2-digit"}).format(now)))); }
-function getClientIp(req:Request) {
-  // TRUSTED_PROXY_IPS adalah deployment gate/dokumentasi; aplikasi tetap harus
-  // dibatasi firewall agar hanya reverse proxy yang dapat mencapai port Next.js.
-  // Reverse proxy wajib menghapus header masuk lalu menulis ulang X-Real-IP.
-  const trustedProxies=(process.env.TRUSTED_PROXY_IPS??"").split(",").map(v=>v.trim()).filter(Boolean);
-  if(trustedProxies.length===0) return null;
-  return req.headers.get("x-real-ip")?.trim() || null;
-}
 export async function GET() {
   const session=await getSession();
   if(!session) return NextResponse.json({message:"Silakan masuk kembali."},{status:401});
@@ -83,7 +76,7 @@ export async function POST(req:Request) {
     }
 
     if(parsed.data.action==="CHECK_OUT"&&(!existing?.checkInAt||existing.checkOutAt)) return NextResponse.json({message:"Check-out tidak valid. Pastikan check-in sudah tercatat dan belum check-out."},{status:409});
-    const ip=getClientIp(req);
+    const ip=getVerifiedClientIp(req.headers);
     const ipValid=!!ip&&client.officeIps.some(x=>x.ipAddress===ip);
     const rule=setting.attendanceNetworkRule;
     if (!Object.values(AttendanceNetworkRule).includes(rule)) {

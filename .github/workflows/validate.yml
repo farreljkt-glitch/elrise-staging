@@ -16,6 +16,7 @@ jobs:
     env:
       DATABASE_URL: mysql://elrise_ci:unused@127.0.0.1:3306/elrise_ci
       AUTH_SECRET: ci-only-placeholder-secret-at-least-32-bytes-long
+      PROXY_TRUST_SECRET: ci-only-proxy-shared-secret-at-least-32-bytes-long
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
