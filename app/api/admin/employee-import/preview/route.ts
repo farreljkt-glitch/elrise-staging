@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const csv=await request.text();
     const rows=parseEmployeeCsv(csv);
     const projects=await db.project.findMany({where:{clientId:actor.clientId,isActive:true,id:{in:[...new Set(rows.map(r=>r.projectId))]}},select:{id:true}});
-    const existing=await db.pegawai.findMany({where:{OR:[{idPegawai:{in:rows.map(r=>r.employeeCode)}},{clientId:actor.clientId,email:{in:rows.map(r=>r.email)}}]},select:{idPegawai:true,email:true,clientId:true}});
+    const existing=await db.pegawai.findMany({where:{clientId:actor.clientId,OR:[{idPegawai:{in:rows.map(r=>r.employeeCode)}},{email:{in:rows.map(r=>r.email)}}]},select:{idPegawai:true,email:true,clientId:true}});
     const existingUsers=await db.user.findMany({where:{email:{in:rows.map(r=>r.email)}},select:{email:true}});
     const registeredEmails=new Set(existingUsers.map(u=>u.email.toLowerCase()));
     const projectIds=new Set(projects.map(p=>p.id));

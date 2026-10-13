@@ -193,7 +193,7 @@ model User {
 
 model Pegawai {
   id                     String                  @id @default(cuid())
-  idPegawai              String                  @unique @db.VarChar(80)
+  idPegawai              String                  @db.VarChar(80)
   clientId               String
   projectId              String
   nama                   String                  @db.VarChar(180)
@@ -222,6 +222,7 @@ model Pegawai {
   integrationEmployeeMap IntegrationEmployeeMap?
 
   @@unique([clientId, email])
+  @@unique([clientId, idPegawai])
   @@index([clientId, projectId, isActive])
   @@index([clientId, nama])
 }

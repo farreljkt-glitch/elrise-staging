@@ -25,7 +25,7 @@ export async function commitEmployeeCsv(clientId: string, csv: string, expectedS
     const emails = rows.map(row => row.email);
     const [existingEmployees, existingUsers] = await Promise.all([
       tx.pegawai.findMany({
-        where: { OR: [{ idPegawai: { in: codes } }, { clientId, email: { in: emails } }] },
+        where: { clientId, OR: [{ idPegawai: { in: codes } }, { email: { in: emails } }] },
         select: { id: true }
       }),
       tx.user.findMany({ where: { email: { in: emails } }, select: { id: true } })

@@ -34,7 +34,7 @@ async function main() {
     email: "employee-a-" + suffix + "@example.com", gajiPokok: 1_000_000n,
   } });
   const employeeB = await db.pegawai.create({ data: {
-    clientId: clientB.id, projectId: projectB.id, nama: "Synthetic B", idPegawai: "EB-" + suffix,
+    clientId: clientB.id, projectId: projectB.id, nama: "Synthetic B", idPegawai: "EA-" + suffix,
     email: "employee-b-" + suffix + "@example.com", gajiPokok: 2_000_000n,
   } });
   const password = "ci-demo-secret-" + suffix;
@@ -61,7 +61,8 @@ async function main() {
   assert.ok(!listA.body.employees.some(x=>x.id===employeeB.id));
   assert.ok(listB.body.employees.some(x=>x.id===employeeB.id));
   assert.ok(!listB.body.employees.some(x=>x.id===employeeA.id));
-  console.log("PASS tenant-filtered HTTP employee lists");
+  assert.equal(employeeA.idPegawai,employeeB.idPegawai);
+  console.log("PASS tenant-filtered HTTP lists with duplicate codes across PT");
 
   const detailB = await request("/api/admin/employees/" + employeeB.id, withCookie(cookieA));
   assert.equal(detailB.response.status, 404);

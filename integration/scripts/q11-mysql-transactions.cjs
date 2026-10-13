@@ -23,14 +23,16 @@ async function main() {
     email: "a-" + suffix + "@example.invalid", nama: "Employee A", gajiPokok: 1_250_000n,
   } });
   const employeeB = await db.pegawai.create({ data: {
-    clientId: b.id, projectId: pb.id, idPegawai: "QB-" + suffix,
+    clientId: b.id, projectId: pb.id, idPegawai: "QA-" + suffix,
     email: "b-" + suffix + "@example.invalid", nama: "Employee B", gajiPokok: 2_500_000n,
   } });
   // Isolation relies on application queries being scoped, not on automatic MySQL row security.
   assert.equal((await db.pegawai.findMany({ where: { clientId: a.id } })).length, 1);
   assert.equal(await db.pegawai.findFirst({ where: { clientId: a.id, id: employeeB.id } }), null);
   assert.equal(await db.pegawai.findFirst({ where: { clientId: b.id, id: employeeA.id } }), null);
-  console.log("PASS tenant-scoped repository lookup");
+  assert.equal(employeeA.idPegawai, employeeB.idPegawai);
+  assert.equal(await db.pegawai.count({where:{idPegawai:employeeA.idPegawai}}),2);
+  console.log("PASS identical employee codes allowed in different tenants, tenant-scoped repository lookup");
 
   // A transaction rejected after a write must not leave an employee behind.
   const rollbackCode = "ROLL-" + suffix;

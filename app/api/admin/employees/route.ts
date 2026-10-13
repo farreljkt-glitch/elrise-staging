@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       if (!project) throw new Error("Project unavailable");
       const conflicts = await Promise.all([
         tx.pegawai.findFirst({ where: { OR: [
-          { idPegawai: input.employeeCode },
+          { clientId: actor.clientId!, idPegawai: input.employeeCode },
           { clientId: actor.clientId!, email: input.email },
         ] }, select: { id: true } }),
         tx.user.findFirst({ where: { email: input.email }, select: { id: true } }),
