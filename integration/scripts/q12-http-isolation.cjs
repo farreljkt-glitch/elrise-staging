@@ -388,6 +388,54 @@ async function main() {
 
   console.log("PASS S3 Superadmin privileged invitations and role-scoped activation");
 
+  // Sprint 2: Elrise-only draft mapping must never activate bundle/Gajiku.
+  const postDraft=(path,body,cookie=cookieSuper)=>request(path,{
+    method:"POST",headers:{cookie,"content-type":"application/json"},body:JSON.stringify(body),
+  });
+  const draft={clientId:clientA.id,externalTenantId:"staging-gajiku-"+suffix};
+  assert.equal((await postDraft("/api/superadmin/gajiku-connections",draft,cookieA)).response.status,403);
+  const createdDraft=await postDraft("/api/superadmin/gajiku-connections",draft);
+  assert.equal(createdDraft.response.status,201,JSON.stringify(createdDraft.body));
+  assert.equal(createdDraft.body.connection.state,"DISABLED");
+  assert.equal(createdDraft.body.connection.verifiedAt,null);
+  assert.equal(await db.bundleSubscription.count({where:{clientId:clientA.id,mode:"BUNDLE"}}),0);
+  const reusingId=await postDraft("/api/superadmin/gajiku-connections",{
+    clientId:clientB.id,externalTenantId:draft.externalTenantId,
+  });
+  assert.equal(reusingId.response.status,409,"external tenant ID must be globally unique");
+  const forgedVerified=await postDraft("/api/superadmin/gajiku-connections",{
+    ...draft,verifiedAt:"2026-10-13T00:00:00Z",state:"ACTIVE",
+  });
+  assert.equal(forgedVerified.response.status,400,"browser cannot mark integration verified");
+  const foreignDraftMapping=await postDraft("/api/superadmin/gajiku-mappings",{
+    clientId:clientA.id,pegawaiId:employeeB.id,externalEmployeeId:"external-b",
+  });
+  assert.equal(foreignDraftMapping.response.status,404,"cross-tenant employee mapping denied");
+  const mappedDraft=await postDraft("/api/superadmin/gajiku-mappings",{
+    clientId:clientA.id,pegawaiId:employeeA.id,externalEmployeeId:"external-a-"+suffix,
+  });
+  assert.equal(mappedDraft.response.status,201,JSON.stringify(mappedDraft.body));
+  assert.equal(mappedDraft.body.mapping.verifiedAt,null);
+  const repeatedDraft=await postDraft("/api/superadmin/gajiku-mappings",{
+    clientId:clientA.id,pegawaiId:employeeA.id,externalEmployeeId:"another-external-id",
+  });
+  assert.equal(repeatedDraft.response.status,409);
+  const forgedMapping=await postDraft("/api/superadmin/gajiku-mappings",{
+    clientId:clientA.id,pegawaiId:ownCreate.body.employee.id,
+    externalEmployeeId:"external-new-"+suffix,verifiedAt:"2026-10-13T00:00:00Z",
+  });
+  assert.equal(forgedMapping.response.status,400);
+  const mappedDatabase=await db.integrationEmployeeMap.findUnique({where:{pegawaiId:employeeA.id}});
+  assert.equal(mappedDatabase.clientId,clientA.id);
+  assert.equal(mappedDatabase.verifiedAt,null);
+  const rawConnection=await db.integrationConnection.findUnique({where:{clientId:clientA.id}});
+  assert.equal(rawConnection.state,"DISABLED");
+  const statusDraft=await request("/api/superadmin/gajiku-connections?clientId="+clientA.id,
+    withCookie(cookieSuper));
+  assert.equal(statusDraft.response.status,200);
+  assert.equal(statusDraft.body.integrationReady,false);
+  console.log("PASS Sprint2 draft tenant/mapping, Superadmin RBAC and inactive integration");
+
   console.log("PASS Q12 real HTTP tenant and project isolation");
 }
 main().catch(err => {
