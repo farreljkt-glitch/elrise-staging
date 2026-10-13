@@ -1,6 +1,7 @@
 "use client";
 import {useCallback,useEffect,useState} from "react";
 import Link from "next/link";
+import { OfficeAttendanceSetup } from "@/components/admin/OfficeAttendanceSetup";
 type Project={id:string;code:string;name:string;isActive:boolean;
   _count:{employees:number;projectManagers:number}};
 export default function AdminPtProjects(){
@@ -57,6 +58,7 @@ export default function AdminPtProjects(){
         {busy?"Menyimpan...":"Simpan Project"}
       </button>
     </form>
+    <OfficeAttendanceSetup projects={rows}/>
     <section className="rounded-xl border p-4">
       <h2 className="mb-3 font-semibold">Project PT ({rows.length})</h2>
       {loading&&<p className="text-sm">Memuat project...</p>}

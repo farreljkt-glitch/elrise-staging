@@ -51,6 +51,8 @@ export function Sidebar() {
         return [
           { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
           { label: "Master Pegawai", href: "/admin/pegawai", icon: UserCheck2 },
+          { label: "Project PT", href: "/admin/project", icon: MapPin },
+          { label: "Admin Project", href: "/admin/admin-project", icon: Users2 },
           { label: "Absensi & Validasi", href: "/admin/absensi", icon: CalendarCheck },
           { label: "Cuti & Izin", href: "/admin/cuti", icon: CalendarDays },
           { label: "Payroll", href: "/admin/payroll", icon: DollarSign },
