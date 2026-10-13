@@ -188,6 +188,7 @@ model User {
   managedProject     Project?   @relation("ProjectManagers", fields: [clientId, managedProjectId], references: [clientId, id], onDelete: Restrict)
   auditLogs          AuditLog[]
 
+  @@unique([clientId, pegawaiId])
   @@index([clientId, role, isActive])
   @@index([clientId, managedProjectId])
 }
@@ -507,6 +508,7 @@ model IntegrationEmployeeMap {
   connection         IntegrationConnection @relation(fields: [clientId, connectionId], references: [clientId, id], onDelete: Restrict)
   pegawai            Pegawai               @relation(fields: [clientId, pegawaiId], references: [clientId, id], onDelete: Restrict)
 
+  @@unique([clientId, pegawaiId])
   @@unique([connectionId, externalEmployeeId])
 }
 
